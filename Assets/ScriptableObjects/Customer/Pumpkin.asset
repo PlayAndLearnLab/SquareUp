@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d7f27069c59e458aa224f8b00776315, type: 3}
+  m_Name: Pumpkin
+  m_EditorClassIdentifier: 
+  customerType: 2
+  expectedFlavor: 2
+  expectedFlavorSprite: {fileID: 21300000, guid: a20df216856b240e496b6df5060f893d, type: 3}
+  expectedFlavorAudio: {fileID: 8300000, guid: d78e55501c5d146a7a2fd8db89bcef0e, type: 3}
+  customerPrefab: {fileID: 8505991634959298606, guid: f10425e39139d408da517fd7f42497b0, type: 3}
+  moneyReward: 15

@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 408c02bbb6b2e4ec0b53aa62dc6aca34, type: 3}
+  m_Name: Hot
+  m_EditorClassIdentifier: 
+  label: hot
+  expressions:
+  - {fileID: 11400000, guid: b163ff9de48f4434b8e9136e9db45510, type: 2}
+  - {fileID: 11400000, guid: 7841945323d494bcc90b5a47b5a4ebc2, type: 2}
+  icon: {fileID: 21300000, guid: 58f9ab8d307ed44f891bcb569352afa8, type: 3}

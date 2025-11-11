@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2c935c8921ef4d59b96570febeffd88, type: 3}
+  m_Name: Level_1
+  m_EditorClassIdentifier: 
+  quizName: Computer Vision Quiz
+  score: 0
+  currentQuestion: 0
+  passMark: 4
+  questions:
+  - {fileID: 11400000, guid: 3a931d97301694b63bb9aaf863688646, type: 2}
+  - {fileID: 11400000, guid: 97cb6a060f29f47448ce68032470d3cd, type: 2}
+  - {fileID: 11400000, guid: 5c1148fd11fda4e2c959bb45fb842d7d, type: 2}
+  - {fileID: 11400000, guid: 0a72e6e386ca74e3f81e50bf0907105f, type: 2}
+  learningVideoLink: 
+  introSlides: {fileID: 11400000, guid: f7882101f4bc74cc5b7925bab15ff7ea, type: 2}

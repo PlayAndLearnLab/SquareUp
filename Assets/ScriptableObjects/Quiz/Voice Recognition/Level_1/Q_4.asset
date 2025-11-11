@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46e4e4e1eba2d423bb36718521bc37fa, type: 3}
+  m_Name: Q_4
+  m_EditorClassIdentifier: 
+  question: A customer says, "Can I get a hot chocolate with extra cream?" Which
+    NLP technique helps the AI figure out that "hot chocolate" is the drink and "extra
+    cream" is the topping?
+  answers:
+  - Speech Recognition
+  - Parsing
+  - Machine Translation
+  - Text Generation
+  answerExplanation: Parsing helps the AI understand how words connect to each other
+    in a sentence, making sure orders are accurate.
+  correctAnswer: 1

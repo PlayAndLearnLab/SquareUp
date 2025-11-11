@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d7f27069c59e458aa224f8b00776315, type: 3}
+  m_Name: Candy 2
+  m_EditorClassIdentifier: 
+  customerType: 1
+  expectedFlavor: 0
+  expectedFlavorSprite: {fileID: 21300000, guid: 4ae533ce3ffda4f9d87a1c1625694a81, type: 3}
+  expectedFlavorAudio: {fileID: 8300000, guid: 5380b0b4ef27e40a286e190f0e0bbfda, type: 3}
+  customerPrefab: {fileID: 2221291131001584596, guid: a5ec5223f96934277acd04699735b6e1, type: 3}
+  moneyReward: 15
