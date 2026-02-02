@@ -10,7 +10,6 @@
 //    public GameObject upgradePanel;
 //    public GameObject blockerMask;
 //    private int currentStep = -1;
-//    private int[] stepsWithButton = { 0, 5, 6, 7, 8, 9, 10 };
 
 //    void Start()
 //    {
@@ -63,8 +62,7 @@ public class TutorialController : MonoBehaviour
 
     // Add every step that requires a BUTTON click here.
     // Steps NOT in this list will advance when the player clicks ANYWHERE.
-    //private int[] stepsWithButton = { 0, 5, 6, 7, 8, 9, 10 };
-    private int[] stepsWithButton = { 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13 };
+    private int[] stepsWithButton = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
 
     void Start()
     {

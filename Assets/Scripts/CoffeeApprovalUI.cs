@@ -59,7 +59,7 @@ public class CoffeeApprovalUI : MonoBehaviour
         }
         
         // Log initialization
-        Debug.Log("CoffeeApprovalUI initialized - panel visible, buttons disabled");
+        //Debug.Log("CoffeeApprovalUI initialized - panel visible, buttons disabled");
     }
     
     private void SetButtonsActive(bool active)

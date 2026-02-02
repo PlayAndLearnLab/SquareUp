@@ -21,6 +21,8 @@ public class TutorialStepController : MonoBehaviour
     private Canvas parentCanvas;
     private float diagnosticTimer = 0f;
     private const float DIAGNOSTIC_INTERVAL = 0.5f; // Check every half second
+    private bool addedCanvas = false;
+    private bool addedRaycaster = false;
 
     public void SetStepActive(bool active)
     {
@@ -39,7 +41,7 @@ public class TutorialStepController : MonoBehaviour
 
     void Awake()
     {
-        Debug.Log($"[TutorialStep {step}] Awake - GameObject: {gameObject.name}, Active: {gameObject.activeSelf}, Visible in Hierarchy: {gameObject.activeInHierarchy}");
+        //Debug.Log($"[TutorialStep {step}] Awake - GameObject: {gameObject.name}, Active: {gameObject.activeSelf}, Visible in Hierarchy: {gameObject.activeInHierarchy}");
         
         // Check hierarchy
         Transform current = transform;
@@ -54,7 +56,7 @@ public class TutorialStepController : MonoBehaviour
             if (canvas != null)
             {
                 parentCanvas = canvas;
-                Debug.Log($"[TutorialStep {step}] Found parent canvas: {canvas.name}, RenderMode: {canvas.renderMode}, WorldCamera: {canvas.worldCamera?.name ?? "null"}");
+                //Debug.Log($"[TutorialStep {step}] Found parent canvas: {canvas.name}, RenderMode: {canvas.renderMode}, WorldCamera: {canvas.worldCamera?.name ?? "null"}");
             }
         }
         Debug.Log($"[TutorialStep {step}] Full hierarchy: {hierarchy}");
@@ -64,7 +66,7 @@ public class TutorialStepController : MonoBehaviour
         {
             EventManager.current.onTutorialStepStarted += OnTutorialStepStarted;
             EventManager.current.onTutorialStepCompleted += OnTutorialStepCompleted;
-            Debug.Log($"[TutorialStep {step}] Successfully subscribed to EventManager events");
+            //Debug.Log($"[TutorialStep {step}] Successfully subscribed to EventManager events");
         }
         else
         {
@@ -76,7 +78,7 @@ public class TutorialStepController : MonoBehaviour
         Debug.Log($"[TutorialStep {step}] Image component: {(tutorialImage != null ? "Found" : "Not found")}");
         if (tutorialImage != null)
         {
-            Debug.Log($"[TutorialStep {step}] Image properties - Color: {tutorialImage.color}, Enabled: {tutorialImage.enabled}, Raycast: {tutorialImage.raycastTarget}");
+            //Debug.Log($"[TutorialStep {step}] Image properties - Color: {tutorialImage.color}, Enabled: {tutorialImage.enabled}, Raycast: {tutorialImage.raycastTarget}");
         }
         
         canvasGroup = GetComponent<CanvasGroup>();
@@ -85,7 +87,7 @@ public class TutorialStepController : MonoBehaviour
             //Debug.Log($"[TutorialStep {step}] Adding CanvasGroup component");
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
-        Debug.Log($"[TutorialStep {step}] CanvasGroup - Alpha: {canvasGroup.alpha}, Interactable: {canvasGroup.interactable}, BlocksRaycasts: {canvasGroup.blocksRaycasts}");
+        //Debug.Log($"[TutorialStep {step}] CanvasGroup - Alpha: {canvasGroup.alpha}, Interactable: {canvasGroup.interactable}, BlocksRaycasts: {canvasGroup.blocksRaycasts}");
         
         rectTransform = transform as RectTransform;
         if (rectTransform != null) 
@@ -104,14 +106,22 @@ public class TutorialStepController : MonoBehaviour
             Button btnComponent = button.GetComponent<Button>();
             if (btnComponent != null)
             {
-                btnComponent.onClick.RemoveAllListeners();
+                //btnComponent.onClick.RemoveAllListeners();
+                //btnComponent.onClick.AddListener(() => {
+                //    if (isShowing)
+                //    {
+                //        Debug.Log($"[TutorialStep {step}] Button clicked, completing step");
+                //        EventManager.current.TutorialStepCompleted(step);
+                //    }
+
+                //});
                 btnComponent.onClick.AddListener(() => {
+                    // Only trigger tutorial progress if this specific step is showing
                     if (isShowing)
                     {
-                        Debug.Log($"[TutorialStep {step}] Button clicked, completing step");
+                        Debug.Log($"[TutorialStep {step}] Tutorial progressing...");
                         EventManager.current.TutorialStepCompleted(step);
                     }
-                        
                 });
                 Debug.Log($"[TutorialStep {step}] Button click listener added");
             }
@@ -132,7 +142,7 @@ public class TutorialStepController : MonoBehaviour
 
     public void Start()
     {
-        Debug.Log($"[TutorialStep {step}] Start - Active: {gameObject.activeSelf}, ActiveInHierarchy: {gameObject.activeInHierarchy}");
+        //Debug.Log($"[TutorialStep {step}] Start - Active: {gameObject.activeSelf}, ActiveInHierarchy: {gameObject.activeInHierarchy}");
         // Hide all tutorials at start
         //HideTutorialStep(false);
         Debug.Log($"[TutorialStep {step}] Initial state set to hidden");
@@ -158,25 +168,25 @@ public class TutorialStepController : MonoBehaviour
         isShowing = false;
         if (useCoroutine)
         {
-            Debug.Log($"[TutorialStep {step}] Starting visibility coroutine for hiding");
+            //Debug.Log($"[TutorialStep {step}] Starting visibility coroutine for hiding");
             StartCoroutine(ApplyVisibilityChanges(false));
         }
         else
         {
-            Debug.Log($"[TutorialStep {step}] Directly applying hidden state");
+            //Debug.Log($"[TutorialStep {step}] Directly applying hidden state");
             ApplyHiddenState();
         }
     }
 
     private void ApplyHiddenState()
     {
-        Debug.Log($"[TutorialStep {step}] ApplyHiddenState - GameObject Active: {gameObject.activeSelf}");
+        //Debug.Log($"[TutorialStep {step}] ApplyHiddenState - GameObject Active: {gameObject.activeSelf}");
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 0f;
             canvasGroup.interactable = false;
             canvasGroup.blocksRaycasts = false;
-            Debug.Log($"[TutorialStep {step}] Set CanvasGroup - Alpha: 0, Interactable: false, BlocksRaycasts: false");
+            //Debug.Log($"[TutorialStep {step}] Set CanvasGroup - Alpha: 0, Interactable: false, BlocksRaycasts: false");
         }
         else
         {
@@ -186,7 +196,7 @@ public class TutorialStepController : MonoBehaviour
         if (tutorialImage != null)
         {
             tutorialImage.enabled = false;
-            Debug.Log($"[TutorialStep {step}] Set Image.enabled = false");
+            //Debug.Log($"[TutorialStep {step}] Set Image.enabled = false");
         }
         else
         {
@@ -196,7 +206,7 @@ public class TutorialStepController : MonoBehaviour
         if (button != null && !isGameButton)
         {
             button.SetActive(false);
-            Debug.Log($"[TutorialStep {step}] Set button.active = false");
+            //Debug.Log($"[TutorialStep {step}] Set button.active = false");
         }
         
         Debug.Log($"[TutorialStep {step}] Hidden state applied. Final state - Alpha: {canvasGroup?.alpha}, Image.enabled: {tutorialImage?.enabled}, Active: {gameObject.activeSelf}");
@@ -207,33 +217,33 @@ public class TutorialStepController : MonoBehaviour
 
     private void ShowTutorialStep()
     {
-        Debug.Log($"[TutorialStep {step}] ShowTutorialStep called. Current GameObject.active: {gameObject.activeSelf}");
+        //Debug.Log($"[TutorialStep {step}] ShowTutorialStep called. Current GameObject.active: {gameObject.activeSelf}");
         isShowing = true;
-        Debug.Log($"[TutorialStep {step}] Starting visibility coroutine for showing");
+        //Debug.Log($"[TutorialStep {step}] Starting visibility coroutine for showing");
         StartCoroutine(ApplyVisibilityChanges(true));
     }
     
     private void ApplyVisibleState()
     {
-        Debug.Log($"[TutorialStep {step}] ApplyVisibleState - GameObject Active: {gameObject.activeSelf}");
+        //Debug.Log($"[TutorialStep {step}] ApplyVisibleState - GameObject Active: {gameObject.activeSelf}");
         if (canvasGroup == null) canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup != null)
         {
             canvasGroup.alpha = 1f;
             canvasGroup.interactable = useButton;
             canvasGroup.blocksRaycasts = useButton;
-            Debug.Log($"[TutorialStep {step}] Set CanvasGroup - Alpha: 1, Interactable: {useButton}, BlocksRaycasts: {useButton}");
+            //Debug.Log($"[TutorialStep {step}] Set CanvasGroup - Alpha: 1, Interactable: {useButton}, BlocksRaycasts: {useButton}");
         }
         else
         {
-            Debug.LogError($"[TutorialStep {step}] ERROR: CanvasGroup is null when trying to show");
+            Debug.LogWarning($"[TutorialStep {step}] ERROR: CanvasGroup is null when trying to show");
         }
         gameObject.SetActive(true);
 
         if (tutorialImage != null)
         {
             tutorialImage.enabled = true;
-            Debug.Log($"[TutorialStep {step}] Set Image.enabled = true");
+            //Debug.Log($"[TutorialStep {step}] Set Image.enabled = true");
         }
         else
         {
@@ -244,7 +254,7 @@ public class TutorialStepController : MonoBehaviour
         {
             button.SetActive(true);
             PromoteButton();
-            Debug.Log($"[TutorialStep {step}] Set button.active = true");
+            //Debug.Log($"[TutorialStep {step}] Set button.active = true");
         }
         
         // Force a layout refresh
@@ -252,13 +262,13 @@ public class TutorialStepController : MonoBehaviour
         {
             try {
                 LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
-                Debug.Log($"[TutorialStep {step}] Layout rebuild forced");
+                //Debug.Log($"[TutorialStep {step}] Layout rebuild forced");
             } catch (System.Exception e) {
                 Debug.LogError($"[TutorialStep {step}] ERROR: Layout rebuild failed: {e.Message}");
             }
         }
         
-        Debug.Log($"[TutorialStep {step}] Visible state applied. Final state - Alpha: {canvasGroup?.alpha}, Image.enabled: {tutorialImage?.enabled}, Active: {gameObject.activeSelf}");
+        //Debug.Log($"[TutorialStep {step}] Visible state applied. Final state - Alpha: {canvasGroup?.alpha}, Image.enabled: {tutorialImage?.enabled}, Active: {gameObject.activeSelf}");
         
         // Extra debug for web builds - check if we're actually visible in screen space
         if (rectTransform != null && parentCanvas != null)
@@ -276,8 +286,8 @@ public class TutorialStepController : MonoBehaviour
                 }
             }
             
-             Debug.Log($"[TutorialStep {step}] Visibility check - In screen view: {isInView}, Screen size: {Screen.width}x{Screen.height}");
-             Debug.Log($"[TutorialStep {step}] World corners - TL: {corners[0]}, TR: {corners[1]}, BR: {corners[2]}, BL: {corners[3]}");
+             //Debug.Log($"[TutorialStep {step}] Visibility check - In screen view: {isInView}, Screen size: {Screen.width}x{Screen.height}");
+             //Debug.Log($"[TutorialStep {step}] World corners - TL: {corners[0]}, TR: {corners[1]}, BR: {corners[2]}, BL: {corners[3]}");
         }
         
         // Validate UI state after change
@@ -286,24 +296,24 @@ public class TutorialStepController : MonoBehaviour
     
     private IEnumerator ApplyVisibilityChanges(bool shouldShow)
     {
-         Debug.Log($"[TutorialStep {step}] ApplyVisibilityChanges coroutine started. shouldShow={shouldShow}, isShowing={isShowing}");
+         //Debug.Log($"[TutorialStep {step}] ApplyVisibilityChanges coroutine started. shouldShow={shouldShow}, isShowing={isShowing}");
         
         // Store visibility locally to avoid state corruption in WebGL
         bool targetVisibility = shouldShow;
         
         // First wait for the end of frame
         yield return new WaitForEndOfFrame();
-         Debug.Log($"[TutorialStep {step}] After first WaitForEndOfFrame. Target visibility: {targetVisibility}");
+         //Debug.Log($"[TutorialStep {step}] After first WaitForEndOfFrame. Target visibility: {targetVisibility}");
         
         // Apply the correct state based on parameter
         if (targetVisibility)
         {
-            Debug.Log($"[TutorialStep {step}] Applying visible state from coroutine");
+            //Debug.Log($"[TutorialStep {step}] Applying visible state from coroutine");
             ApplyVisibleState();
         }
         else
         {
-            Debug.Log($"[TutorialStep {step}] Applying hidden state from coroutine");
+            //Debug.Log($"[TutorialStep {step}] Applying hidden state from coroutine");
             ApplyHiddenState();
         }
             
@@ -486,7 +496,7 @@ public class TutorialStepController : MonoBehaviour
         // validationLog.AppendLine($"- Screen Info: Width={Screen.width}, Height={Screen.height}, DPI={Screen.dpi}");
         #endif
         
-        Debug.Log(validationLog.ToString());
+        //Debug.Log(validationLog.ToString());
     }
 
     void OnTutorialStepStarted(int stepTriggered)
@@ -547,29 +557,98 @@ public class TutorialStepController : MonoBehaviour
         }
     }
 
+    //public void PromoteButton_old()
+    //{
+    //    if (button == null) return;
+
+    //    // 1. Add Canvas if it doesn't exist
+    //    Canvas btnCanvas = button.GetComponent<Canvas>();
+    //    if (btnCanvas == null)
+    //    {
+    //        btnCanvas = button.AddComponent<Canvas>();
+    //        addedCanvas = true;
+    //    }
+
+    //    // 2. Set sorting to be above the Blocker Mask
+    //    btnCanvas.overrideSorting = true;
+    //    btnCanvas.sortingOrder = 100; // Ensure this is higher than your Blocker Mask's sorting
+
+    //    // 3. Add GraphicRaycaster so the button can still be clicked
+    //    if (button.GetComponent<GraphicRaycaster>() == null)
+    //    {
+    //        button.AddComponent<GraphicRaycaster>();
+    //        addedRaycaster = true;
+    //    }
+            
+    //}
+
     public void PromoteButton()
     {
         if (button == null) return;
 
-        // 1. Add Canvas if it doesn't exist
+        // 1. Get or Add Canvas
         Canvas btnCanvas = button.GetComponent<Canvas>();
-        if (btnCanvas == null) btnCanvas = button.AddComponent<Canvas>();
+        if (btnCanvas == null)
+        {
+            btnCanvas = button.AddComponent<Canvas>();
+        }
 
-        // 2. Set sorting to be above the Blocker Mask
+        // Ensure the Canvas component itself is enabled so the button is visible
+        //btnCanvas.enabled = true;
         btnCanvas.overrideSorting = true;
-        btnCanvas.sortingOrder = 100; // Ensure this is higher than your Blocker Mask's sorting
+        btnCanvas.sortingOrder = 100;
 
-        // 3. Add GraphicRaycaster so the button can still be clicked
-        if (button.GetComponent<GraphicRaycaster>() == null)
-            button.AddComponent<GraphicRaycaster>();
+        // 2. Get or Add GraphicRaycaster
+        GraphicRaycaster raycaster = button.GetComponent<GraphicRaycaster>();
+        if (raycaster == null)
+        {
+            raycaster = button.AddComponent<GraphicRaycaster>();
+        }
+        raycaster.enabled = true;
     }
+
+    //public void DemoteButton_old()
+    //{
+    //    if (button == null) return;
+
+    //    // Remove the temporary components to return the button to its normal state
+    //    Destroy(button.GetComponent<GraphicRaycaster>());
+    //    Destroy(button.GetComponent<Canvas>());
+    //}
 
     public void DemoteButton()
     {
         if (button == null) return;
 
-        // Remove the temporary components to return the button to its normal state
-        Destroy(button.GetComponent<GraphicRaycaster>());
-        Destroy(button.GetComponent<Canvas>());
+        Canvas btnCanvas = button.GetComponent<Canvas>();
+        if (btnCanvas != null)
+        {
+            //// If we added it, kill it. 
+            //if (addedCanvas)
+            //{
+            //    Destroy(btnCanvas);
+            //    addedCanvas = false;
+            //}
+            //else
+            //{
+            //    // If it was already there, just put it back to normal
+            //    btnCanvas.overrideSorting = false;
+            //}
+            btnCanvas.overrideSorting = false;
+        }
+
+        //GraphicRaycaster raycaster = button.GetComponent<GraphicRaycaster>();
+        //if (raycaster != null)
+        //{
+        //    raycaster.enabled = true;
+        //}
+
+        //// Only destroy the raycaster if we were the ones who added it
+        //if (addedRaycaster)
+        //{
+        //    GraphicRaycaster raycaster = button.GetComponent<GraphicRaycaster>();
+        //    if (raycaster != null) Destroy(raycaster);
+        //    addedRaycaster = false;
+        //}
     }
 }

@@ -237,6 +237,7 @@ public class EventManager : MonoBehaviour
         if (onStartQuiz != null)
         {
             onStartQuiz.Invoke(quiz);
+            Debug.Log($"Quiz called by event maager");
         }
         else
         {
