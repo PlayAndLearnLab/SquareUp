@@ -17,7 +17,7 @@ MonoBehaviour:
   moneyReward: 15
   customerType: 2
   favoriteTemp: 0
-  orderDialogue: I'm craving a hot chocolate. Make it s!
+  orderDialogue: I'm craving a hot chocolate. Make it sweet!
   orderAudio: {fileID: 8300000, guid: 9b65b910409b0486e9be6e70f7e13598, type: 3}
   aiConfidence: 0.5
   expectedFlavor: 4
