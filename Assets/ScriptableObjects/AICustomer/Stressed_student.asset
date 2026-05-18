@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52834f35ed8743b281c485c2838cc02, type: 3}
+  m_Name: Stressed_student
+  m_EditorClassIdentifier: 
+  customerName: ExamStudent_Profile
+  customerPrefab: {fileID: 8247667208238638626, guid: 59bad08d7be3a4e87bd0659c159710a1, type: 3}
+  moneyReward: 15
+  customerType: 1
+  favoriteTemp: 1
+  orderDialogue: 
+  orderAudio: {fileID: 0}
+  aiConfidence: 0.5
+  expectedFlavor: 0
+  expectedTemp: 0

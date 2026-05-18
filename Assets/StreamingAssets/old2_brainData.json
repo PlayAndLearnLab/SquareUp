@@ -1,0 +1,25 @@
+{
+  "keywords": [
+    { "keyword": "tired", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1 },
+    { "keyword": "deadline", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 0.0, "weight": 0.1 },
+    { "keyword": "morning", "suggestedCaffeine": 1, "suggestedTemp": 0.0, "suggestedProfile": 0.5, "weight": 0.1 },
+    { "keyword": "coffee", "suggestedCaffeine": 1, "suggestedTemp": 0.0, "suggestedProfile": 0.0, "weight": 0.1 },
+    { "keyword": "candy", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 1.0, "weight": 0.1 },
+    { "keyword": "matcha", "suggestedCaffeine": 1, "suggestedTemp": 0.0, "suggestedProfile": 0.3, "weight": 0.1 },
+    
+    { "keyword": "night", "suggestedCaffeine": -1, "suggestedTemp": 0.0, "suggestedProfile": 0.7, "weight": 0.1 },
+    { "keyword": "relax", "suggestedCaffeine": -1, "suggestedTemp": 0.0, "suggestedProfile": 0.8, "weight": 0.1 },
+    { "keyword": "herbal", "suggestedCaffeine": -1, "suggestedTemp": 0.0, "suggestedProfile": 0.2, "weight": 0.1 },
+    { "keyword": "pumpkin", "suggestedCaffeine": -1, "suggestedTemp": 0.0, "suggestedProfile": 0.9, "weight": 0.1 },
+    { "keyword": "chocolate", "suggestedCaffeine": -1, "suggestedTemp": 0.0, "suggestedProfile": 0.5, "weight": 0.1 },
+    { "keyword": "decaf", "suggestedCaffeine": -1, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1 },
+
+    { "keyword": "freezing", "suggestedCaffeine": 0, "suggestedTemp": 0.0, "suggestedProfile": 0.5, "weight": 0.1 },
+    { "keyword": "sweating", "suggestedCaffeine": 0, "suggestedTemp": 1.0, "suggestedProfile": 0.5, "weight": 0.1 },
+    { "keyword": "sweet", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 1.0, "weight": 0.1 },
+    { "keyword": "bitter", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.0, "weight": 0.1 },
+    { "keyword": "hot", "suggestedCaffeine": 0, "suggestedTemp": 0.0, "suggestedProfile": 0.5, "weight": 0.1 },
+    { "keyword": "ice", "suggestedCaffeine": 0, "suggestedTemp": 1.0, "suggestedProfile": 0.5, "weight": 0.1 },
+    { "keyword": "iced", "suggestedCaffeine": 0, "suggestedTemp": 1.0, "suggestedProfile": 0.5, "weight": 0.1 }
+  ]
+}

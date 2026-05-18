@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87b7a182be4fc48619b26ed619f6ad45, type: 3}
+  m_Name: AI Level 0
+  m_EditorClassIdentifier: 
+  trainingTime: 60
+  trainingWave: {fileID: 11400000, guid: 070e3932cb2954ef9a1aa7678584db9f, type: 2}
+  testWave: {fileID: 11400000, guid: 38a2eda0ea4854168ad45b0cd027d29a, type: 2}

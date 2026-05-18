@@ -1,3 +1,4 @@
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -47,15 +48,15 @@ public class LineController : MonoBehaviour
             // Avoid adding duplicates if logic elsewhere might call this multiple times
             if (queue.Contains(customerController))
             {
-                 Debug.LogWarning($"Customer {customerController.name} already in line. Ignoring WaitInLine call.");
-                 yield break;
+                Debug.LogWarning($"Customer {customerController.gameObject.name} already in line. Ignoring WaitInLine call.");
+                yield break;
             }
 
             queue.Enqueue(customerController);
             initialPosition = queue.Count; // 1-based position
             initialTargetPosition = GetTargetPositionForIndex(initialPosition);
 
-             // Clear any potentially stale move coroutine entry
+            // Clear any potentially stale move coroutine entry
             if (_activeMoveCoroutines.ContainsKey(customerController))
             {
                 _activeMoveCoroutines.Remove(customerController);
@@ -64,25 +65,29 @@ public class LineController : MonoBehaviour
 
         // Start the initial walk to the back of the line
         Coroutine initialMoveCoroutine = StartCoroutine(customerController.WalkTo(initialTargetPosition, speed));
-        lock(_queueLock) // Lock briefly to safely add to dictionary
+        lock (_queueLock) // Lock briefly to safely add to dictionary
         {
-             // Only add if the customer is still relevant (might have been removed immediately)
-             if (queue.Contains(customerController)) {
-                 _activeMoveCoroutines[customerController] = initialMoveCoroutine;
-             } else {
-                 // If the customer was removed before we could track the coroutine, stop it.
-                 if(initialMoveCoroutine != null) StopCoroutine(initialMoveCoroutine);
-                 yield break; // Exit early as the customer is no longer in line
-             }
+            // Only add if the customer is still relevant (might have been removed immediately)
+            if (queue.Contains(customerController))
+            {
+                _activeMoveCoroutines[customerController] = initialMoveCoroutine;
+            }
+            else
+            {
+                // If the customer was removed before we could track the coroutine, stop it.
+                if (initialMoveCoroutine != null) StopCoroutine(initialMoveCoroutine);
+                yield break; // Exit early as the customer is no longer in line
+            }
         }
 
         // Ensure the coroutine is valid before yielding
-        if (initialMoveCoroutine == null) {
-             // This might happen if WalkTo returns null immediately or if the customer was removed.
-             Debug.LogWarning($"Initial move coroutine for {customerController.name} was null or stopped early.");
-             // Attempt cleanup just in case
-             lock(_queueLock) { _activeMoveCoroutines.Remove(customerController); }
-             yield break;
+        if (initialMoveCoroutine == null)
+        {
+            // This might happen if WalkTo returns null immediately or if the customer was removed.
+            Debug.LogWarning($"Initial move coroutine for {customerController.gameObject.name} was null or stopped early.");
+            // Attempt cleanup just in case
+            lock (_queueLock) { _activeMoveCoroutines.Remove(customerController); }
+            yield break;
         }
 
         yield return initialMoveCoroutine; // Wait for the initial walk to complete
@@ -91,7 +96,7 @@ public class LineController : MonoBehaviour
         if (GetPositionInLine(customerController) == -1)
         {
             // Customer was removed during the initial walk
-            lock(_queueLock) { _activeMoveCoroutines.Remove(customerController); }
+            lock (_queueLock) { _activeMoveCoroutines.Remove(customerController); }
             yield break;
         }
 
@@ -105,42 +110,178 @@ public class LineController : MonoBehaviour
             // Debug.Log($"WaitInLine Check: {customerController.name} at position {currentPos}"); // Verbose log
 
             // Check if we should time out
-            if (Time.time - waitStartTime > timeoutDuration) {
-                Debug.LogWarning($"WaitInLine TIMEOUT: Customer {customerController.name} timed out waiting to reach position 1 (Current: {currentPos})");
+            if (Time.time - waitStartTime > timeoutDuration)
+            {
+                Debug.LogWarning($"WaitInLine TIMEOUT: Customer {customerController.gameObject.name} timed out waiting to reach position 1 (Current: {currentPos})");
                 return true; // Break the wait and continue
             }
 
             // Check if removed from line
-            if (currentPos == -1) {
-                Debug.LogWarning($"WaitInLine ABORT: Customer {customerController.name} is no longer in line (position -1) during WaitUntil");
+            if (currentPos == -1)
+            {
+                Debug.LogWarning($"WaitInLine ABORT: Customer {customerController.gameObject.name} is no longer in line (position -1) during WaitUntil");
                 return true; // Break the wait and continue
             }
 
-            // Normal condition - wait until reaching position 1
-            return currentPos == 1;
+            if (currentPos == 1)
+            {
+                Debug.Log($"[WaitUntil RESOLVED] {customerController.name} at pos 1");
+                return true;
+            }
+
+            return false;
         });
+
+        Debug.Log($"[WaitUntil DONE] {customerController.name} finalPos={GetPositionInLine(customerController)}");
+
 
         // Debug information about the customer's position after the wait
         int finalPosition = GetPositionInLine(customerController);
-        if (finalPosition == 1) {
-            Debug.Log($"Customer {customerController.name} has reached the front of the line successfully");
-        } else if (finalPosition == -1) {
-            Debug.LogWarning($"Customer {customerController.name} is no longer in the line after waiting");
-        } else {
-            Debug.LogWarning($"Customer {customerController.name} waited for front position but ended up at position {finalPosition}");
+        if (finalPosition == 1)
+        {
+            Debug.Log($"Customer {customerController.gameObject.name} has reached the front successfully");
+        }
+        else if (finalPosition == -1)
+        {
+            Debug.LogWarning($"Customer {customerController.gameObject.name} is no longer in the line after waiting");
+        }
+        else
+        {
+            Debug.LogWarning($"Customer {customerController.gameObject.name} waited for front position but ended up at position {finalPosition}");
         }
 
         // Once the WaitUntil is satisfied, this coroutine finishes, indicating the customer is at the front.
-         lock(_queueLock) // Clean up the coroutine tracker
-         {
+        lock (_queueLock) // Clean up the coroutine tracker
+        {
             if (_activeMoveCoroutines.ContainsKey(customerController))
             {
                 _activeMoveCoroutines.Remove(customerController);
             }
-         }
+        }
     }
 
+    //public void EnqueueCustomer(int speed, MovementController customerController)
+    //{
+    //    if (customerController == null) return;
+    //    customerController.speed = speed;
+    //    lock (_queueLock)
+    //    {
+    //        if (queue.Contains(customerController)) return;
+    //        queue.Enqueue(customerController);
+    //        int position = queue.Count;
+    //        Vector3 targetPos = GetTargetPositionForIndex(position);
+    //        if (_activeMoveCoroutines.ContainsKey(customerController))
+    //            _activeMoveCoroutines.Remove(customerController);
+    //        Coroutine move = StartCoroutine(customerController.WalkTo(targetPos, speed));
+    //        _activeMoveCoroutines[customerController] = move;
+    //    }
+    //}
+
+
     public void RemoveFromLine(MovementController customerController)
+    {
+        if (customerController == null) return;
+
+        MovementController newFrontCustomer = null;
+        bool removalOccurred = false;
+
+        lock (_queueLock)
+        {
+            // 1. Convert to List for safe, non-destructive searching
+            List<MovementController> currentLine = new List<MovementController>(queue);
+
+            // 2. Check if the customer is actually there using the reference (not name)
+            if (!currentLine.Contains(customerController))
+            {
+                // Even if not in line, clean up their move tracker as a safety measure
+                CleanupActiveCoroutine(customerController);
+                return;
+            }
+
+            // 3. Identify the index of the person leaving
+            int removedIndex = currentLine.IndexOf(customerController) + 1; // 1-based
+
+            // 4. Perform the removal and rebuild the queue
+            currentLine.Remove(customerController);
+            queue = new Queue<MovementController>(currentLine);
+            removalOccurred = true;
+
+            // 5. Physically stop the departing customer
+            CleanupActiveCoroutine(customerController);
+
+            Debug.Log($"[Line] Removed {customerController.name} (Pos: {removedIndex}). New Length: {queue.Count}");
+
+            // 6. Update positions for everyone BEHIND the person who left
+            // We only need to move people whose 1-based index was > removedIndex
+            for (int i = 0; i < currentLine.Count; i++)
+            {
+                int newPosition = i + 1; // 1-based
+
+                // Optimization: Only trigger a move if their position shifted 
+                // (i.e., they were at or behind the removed person)
+                if (newPosition >= removedIndex)
+                {
+                    MovementController runner = currentLine[i];
+                    if (runner != null)
+                    {
+                        UpdateCustomerPosition(runner, newPosition);
+                    }
+                }
+            }
+
+            // 7. Check if we have a new person at the very front
+            newFrontCustomer = GetFrontCustomer();
+        }
+
+        // 8. Signal the new front person outside the lock
+        if (removalOccurred && newFrontCustomer != null)
+        {
+            StartCoroutine(SignalCustomerReachedFront(newFrontCustomer));
+        }
+    }
+
+    // Helper to stop and clear a specific customer's movement
+    private void CleanupActiveCoroutine(MovementController customer)
+    {
+        if (_activeMoveCoroutines.TryGetValue(customer, out Coroutine move) && move != null)
+        {
+            StopCoroutine(move);
+        }
+        _activeMoveCoroutines.Remove(customer);
+    }
+
+    // Helper to start the walk to a new spot in line
+    private void UpdateCustomerPosition(MovementController customer, int index)
+    {
+        CleanupActiveCoroutine(customer); // Stop current walk before starting new one
+
+        Vector3 target = GetTargetPositionForIndex(index);
+        Coroutine newMove = StartCoroutine(customer.WalkTo(target, customer.speed));
+        _activeMoveCoroutines[customer] = newMove;
+    }
+
+    public void EnqueueCustomer(int speed, MovementController customerController)
+    {
+        if (customerController == null) return;
+        customerController.speed = speed;
+
+        lock (_queueLock)
+        {
+            if (queue.Contains(customerController)) return;
+
+            queue.Enqueue(customerController);
+            int position = queue.Count;
+            Vector3 targetPos = GetTargetPositionForIndex(position);
+
+            if (_activeMoveCoroutines.ContainsKey(customerController))
+                _activeMoveCoroutines.Remove(customerController);
+
+            Coroutine move = StartCoroutine(customerController.WalkTo(targetPos, speed));
+            _activeMoveCoroutines[customerController] = move;
+        }
+    }
+
+    public void old_RemoveFromLine(MovementController customerController)
     {
         if (customerController == null) return;
 
@@ -153,13 +294,13 @@ public class LineController : MonoBehaviour
         {
             originalLineLength = GetLineLength(); // Use safe GetLineLength
             originalFrontCustomer = GetFrontCustomer();
-            Debug.Log($"[RemoveFromLine-{customerController.name}] START: Original Front='{originalFrontCustomer?.name}', Length={originalLineLength}");
+            Debug.Log($"[RemoveFromLine-{customerController.GetInstanceID()}] START: Original Front='{originalFrontCustomer?.name}', Length={originalLineLength}");
 
             // Check if the customer exists in the line
             if (queue == null || queue.Count == 0 || !queue.Contains(customerController))
             {
-                 Debug.LogWarning($"[RemoveFromLine-{customerController.name}] ABORT: Customer not found in queue.");
-                 // Ensure cleanup even if not found in queue (might be called during destruction)
+                Debug.LogWarning($"[RemoveFromLine-{customerController.GetInstanceID()}] ABORT: Customer not found in queue.");
+                // Ensure cleanup even if not found in queue (might be called during destruction)
                 if (_activeMoveCoroutines.TryGetValue(customerController, out Coroutine strayCoroutine) && strayCoroutine != null)
                 {
                     StopCoroutine(strayCoroutine);
@@ -172,7 +313,7 @@ public class LineController : MonoBehaviour
             if (_activeMoveCoroutines.TryGetValue(customerController, out Coroutine departingCoroutine) && departingCoroutine != null)
             {
                 StopCoroutine(departingCoroutine);
-                 Debug.Log($"[RemoveFromLine-{customerController.name}] Stopped existing move coroutine.");
+                Debug.Log($"[RemoveFromLine-{customerController.GetInstanceID()}] Stopped existing move coroutine.");
             }
             _activeMoveCoroutines.Remove(customerController);
 
@@ -197,17 +338,18 @@ public class LineController : MonoBehaviour
                 else
                 {
                     // If a null customer is found, just skip it. The line will shorten.
-                    Debug.LogWarning($"[RemoveFromLine-{customerController.name}] Null customer found at original position {readIndex} during rebuild.");
+                    Debug.LogWarning($"[RemoveFromLine-{customerController.GetInstanceID()}] Null customer found at original position {readIndex} during rebuild.");
                 }
-                 readIndex++;
+                readIndex++;
             }
 
             // Assign the rebuilt queue
             queue = tempQueue;
 
-            if (!removalOccurred) {
-                 Debug.LogError($"[RemoveFromLine-{customerController.name}] ERROR: Failed to find customer during queue rebuild even though Contains was true.");
-                 return;
+            if (!removalOccurred)
+            {
+                Debug.LogError($"[RemoveFromLine-{customerController.name}] ERROR: Failed to find customer during queue rebuild even though Contains was true.");
+                return;
             }
 
             // After rebuilding, identify the actual new front customer
@@ -219,8 +361,8 @@ public class LineController : MonoBehaviour
             int writeIndex = 1; // Reset index for the *new* queue
             foreach (MovementController customerInLine in queue)
             {
-                 if (writeIndex >= removedIndex && customerInLine != null)
-                 {
+                if (writeIndex >= removedIndex && customerInLine != null)
+                {
                     Vector3 newTargetPosition = GetTargetPositionForIndex(writeIndex);
                     Debug.Log($"[RemoveFromLine-{customerController.name}] Triggering move for {customerInLine.name} (Index {writeIndex}) to {newTargetPosition}");
 
@@ -234,10 +376,12 @@ public class LineController : MonoBehaviour
                     int customerSpeed = customerInLine.speed;
                     Coroutine moveCoroutine = StartCoroutine(customerInLine.WalkTo(newTargetPosition, customerSpeed));
                     _activeMoveCoroutines[customerInLine] = moveCoroutine; // Track the new coroutine
-                 } else if (customerInLine == null) {
-                     Debug.LogError($"[RemoveFromLine-{customerController.name}] ERROR: Found null customer in queue during position update loop at index {writeIndex}");
-                 }
-                 writeIndex++;
+                }
+                else if (customerInLine == null)
+                {
+                    Debug.LogError($"[RemoveFromLine-{customerController.name}] ERROR: Found null customer in queue during position update loop at index {writeIndex}");
+                }
+                writeIndex++;
             }
         } // End lock
 
@@ -253,63 +397,53 @@ public class LineController : MonoBehaviour
         }
     }
 
-    // Helper coroutine to ensure the WaitUntil condition in WaitInLine is re-evaluated
     private IEnumerator SignalCustomerReachedFront(MovementController customer)
     {
         if (customer == null) yield break;
-        Debug.Log($"[Signal-{customer.name}] Coroutine START.");
 
-        // Ensure the customer is still intended to be at the front
-        lock(_queueLock)
-        {
-            if (GetPositionInLine(customer) != 1)
-            {
-                 Debug.LogWarning($"[Signal-{customer.name}] ABORT: Customer no longer at position 1.");
-                 yield break;
-            }
-        }
-
-        // Wait for the customer's current movement coroutine to finish
+        // 1. Wait for the CURRENT movement to finish
+        // We fetch the coroutine from the dictionary to ensure we are waiting
+        // for the specific walk that puts them in Position 1.
         Coroutine moveCoroutine = null;
-        lock(_queueLock) // Lock briefly to access dictionary safely
+        lock (_queueLock)
         {
             _activeMoveCoroutines.TryGetValue(customer, out moveCoroutine);
         }
 
         if (moveCoroutine != null)
         {
-            Debug.Log($"[Signal-{customer.name}] Waiting for movement coroutine...");
-            yield return moveCoroutine; // Wait for the walk to complete
-            Debug.Log($"[Signal-{customer.name}] Movement coroutine finished.");
-        }
-        else
-        {
-            Debug.LogWarning($"[Signal-{customer.name}] No active move coroutine found to wait for.");
+            yield return moveCoroutine;
         }
 
-        // Check position again *after* movement is supposed to be done
-        int finalPositionPreSignal = GetPositionInLine(customer);
-        Debug.Log($"[Signal-{customer.name}] Position after movement wait: {finalPositionPreSignal}");
+        // 2. The "Still There?" Check
+        // After the walk finishes, verify they are still at the front.
+        // If Customer 3 was walking to Pos 1, but the player cleared the line 
+        // mid-walk, we don't want to trigger the "At Front" logic.
+        lock (_queueLock)
+        {
+            if (GetPositionInLine(customer) != 1)
+            {
+                Debug.Log($"[Signal] {customer.name} reached destination, but is no longer at the front. Aborting signal.");
+                yield break;
+            }
+        }
 
-        if (finalPositionPreSignal == 1)
+        if (customer.gameObject != null)
         {
-            // Force Unity to update the WaitUntil condition check only if still at front
-            if (customer != null && customer.gameObject != null)
-            {
-                Debug.Log($"[Signal-{customer.name}] Toggling SetActive at final position 1.");
-                customer.gameObject.SetActive(customer.gameObject.activeSelf);
-            }
-            else
-            {
-                 Debug.LogWarning($"[Signal-{customer.name}] Customer/GameObject became null before SetActive toggle.");
-            }
+            customer.gameObject.SetActive(false);
+            customer.gameObject.SetActive(true);
+            Debug.Log($"<color=cyan>[Signal]</color> {customer.name} FORCED check at front.");
         }
-        else
-        {
-            Debug.LogWarning($"[Signal-{customer.name}] Not signaling. Ended up at position {finalPositionPreSignal} after movement.");
-        }
-         Debug.Log($"[Signal-{customer.name}] Coroutine END.");
+
+        // 3. The Final Success
+        // At this point, the WaitUntil() in StartTrainingActions will evaluate to true
+        // because GetPositionInLine returns 1.
+        Debug.Log($"<color=cyan>[Signal]</color> {customer.name} is confirmed at the front and stationary.");
     }
+
+    
+
+    
 
     // This now calculates the position for the *next* spot if someone were to join
     public Vector3 GetLineStartPosition()
@@ -317,9 +451,15 @@ public class LineController : MonoBehaviour
         lock (_queueLock)
         {
             // Target position for the (Count + 1)th spot
-             int nextSpotIndex = queue.Count + 1;
+            int nextSpotIndex = queue.Count + 1;
             return GetTargetPositionForIndex(nextSpotIndex);
         }
+    }
+
+    public Vector3 GetPositionVector(int index)
+    {
+        // Simply wraps your existing private logic to make it public
+        return GetTargetPositionForIndex(index);
     }
 
     public MovementController GetFrontCustomer()
@@ -331,13 +471,14 @@ public class LineController : MonoBehaviour
                 return null;
             }
             // Clean up null refs at the front proactively
-            while(queue.Count > 0 && queue.Peek() == null) {
+            while (queue.Count > 0 && queue.Peek() == null)
+            {
                 Debug.LogWarning("Null customer found at the front of the queue. Dequeuing.");
                 queue.Dequeue();
                 // Removing a null from the front doesn't require shifting others here,
                 // as RemoveFromLine is the primary mechanism for position updates.
             }
-             return queue.Count > 0 ? queue.Peek() : null;
+            return queue.Count > 0 ? queue.Peek() : null;
         }
     }
 
@@ -345,14 +486,16 @@ public class LineController : MonoBehaviour
     {
         lock (_queueLock)
         {
-             // Filters nulls for a more accurate "active" count
-             int count = 0;
-             if (queue != null) {
-                 foreach(var customer in queue) {
-                     if (customer != null) count++;
-                 }
-             }
-             return count;
+            // Filters nulls for a more accurate "active" count
+            int count = 0;
+            if (queue != null)
+            {
+                foreach (var customer in queue)
+                {
+                    if (customer != null) count++;
+                }
+            }
+            return count;
             // return queue?.Count ?? 0; // Previous simpler version
         }
     }
@@ -376,9 +519,10 @@ public class LineController : MonoBehaviour
             int position = 1; // 1-based index
             foreach (MovementController customerInQueue in queue)
             {
-                 if (customerInQueue == null) { // Skip null entries in the queue
-                     continue;
-                 }
+                if (customerInQueue == null)
+                { // Skip null entries in the queue
+                    continue;
+                }
                 if (customerInQueue == customerController)
                 {
                     return position;
@@ -389,23 +533,56 @@ public class LineController : MonoBehaviour
         return -1; // Not found
     }
 
-     // Optional: Cleanup coroutine dictionary if a customer is destroyed externally
-     // Note: This only cleans up if the LineController itself is destroyed.
-     // Individual customer destruction needs handling within RemoveFromLine or similar logic.
-     void OnDestroy()
-     {
-         // Stop all active movement coroutines managed by this controller when the controller itself is destroyed
-         lock(_queueLock)
-         {
-             foreach(var kvp in _activeMoveCoroutines)
-             {
-                 if (kvp.Key != null && kvp.Value != null) // Check if coroutine is still valid
-                 {
+    public bool IsCustomerInLine(MovementController customerController)
+    {
+        // If GetPositionInLine returns 1 or greater, they are in the line.
+        // If it returns -1, they are not.
+        return GetPositionInLine(customerController) != -1;
+    }
+
+    private void OnEnable()
+    {
+        // Subscribe to the day start event to clear stale data
+        if (EventManager.current != null)
+            EventManager.current.onDayStarted += ClearLineForNewDay;
+    }
+
+    private void OnDisable()
+    {
+        if (EventManager.current != null)
+            EventManager.current.onDayStarted -= ClearLineForNewDay;
+    }
+
+    private void ClearLineForNewDay(int duration)
+    {
+        lock (_queueLock)
+        {
+            queue.Clear();
+            _activeMoveCoroutines.Clear();
+            Debug.Log("LineController: Cleared for new day.");
+        }
+    }
+
+    // Optional: Cleanup coroutine dictionary if a customer is destroyed externally
+    // Note: This only cleans up if the LineController itself is destroyed.
+    // Individual customer destruction needs handling within RemoveFromLine or similar logic.
+    void OnDestroy()
+    {
+        // Stop all active movement coroutines managed by this controller when the controller itself is destroyed
+        lock (_queueLock)
+        {
+            foreach (var kvp in _activeMoveCoroutines)
+            {
+                if (kvp.Key != null && kvp.Value != null) // Check if coroutine is still valid
+                {
                     StopCoroutine(kvp.Value);
-                 }
-             }
-             _activeMoveCoroutines.Clear();
-             if (queue != null) queue.Clear(); // Clear the queue as well
-         }
-     }
+                }
+            }
+            _activeMoveCoroutines.Clear();
+            if (queue != null) queue.Clear(); // Clear the queue as well
+        }
+    }
 }
+
+
+

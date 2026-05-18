@@ -30,12 +30,43 @@ public class CustomerController : MovementController
     new void Awake()
     {
         base.Awake();
-        coffeeObject.SetActive(false);
-        speechBubble = objTransform.GetChild(0).gameObject;
-        speechBubble.SetActive(false);
+        //coffeeObject.SetActive(false);
+        
 
-        speechBubbleController = speechBubble.GetComponent<SpeechBubbleController>();
+        speechBubbleController = GetComponentInChildren<SpeechBubbleController>(true);
+
+        if (speechBubbleController != null)
+        {
+            speechBubble = speechBubbleController.gameObject;
+            speechBubble.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError($"SpeechBubbleController missing on {gameObject.name}!");
+        }
+        //speechBubble = objTransform.GetChild(0).gameObject;
+        //speechBubble.SetActive(false);
+
+        //speechBubbleController = speechBubble.GetComponent<SpeechBubbleController>();
+        if (coffeeObject != null) coffeeObject.SetActive(false);
         audioSource = GetComponent<AudioSource>();
+    }
+
+    public void RefreshReferences()
+    {
+        // Search the children specifically for the controller
+        speechBubbleController = GetComponentInChildren<SpeechBubbleController>(true);
+
+        if (speechBubbleController != null)
+        {
+            speechBubble = speechBubbleController.gameObject;
+            // Ensure we don't accidentally leave it active on spawn
+            //speechBubble.SetActive(false);
+        }
+        else
+        {
+            Debug.LogError($"[CustomerController] Still can't find SpeechBubbleController on {gameObject.name}!");
+        }
     }
 
     public void ShowCoffee()
@@ -61,6 +92,64 @@ public class CustomerController : MovementController
             wasClicked = clicked;
         });
         clickedCallback(wasClicked);
+    }
+
+    public bool IsSpeechBubbleReady()
+    {
+        return speechBubbleController != null;
+    }
+
+    public void ShowSpeechBubble(SpeechBubbleController.BubbleIcon icon)
+    {
+        // If the reference is missing for any reason, try to find it
+        if (speechBubbleController == null) RefreshReferences();
+
+        if (speechBubbleController != null)
+        {
+            // 1. Force the GameObject active first
+            speechBubbleController.gameObject.SetActive(true);
+
+            // 2. Tell the controller what icon to show
+            speechBubbleController.ShowSpeechBubble(icon);
+
+            Debug.Log($"[CustomerController] Showing bubble with icon {icon} on {gameObject.name}");
+        }
+        else
+        {
+            Debug.LogError($"[CustomerController] Cannot show bubble: Controller is null on {gameObject.name}");
+        }
+    }
+
+    public void old_ShowSpeechBubble(SpeechBubbleController.BubbleIcon icon)
+    {
+        if (speechBubble != null)
+        {
+            // 1. Get the script component from the GameObject
+            SpeechBubbleController bubbleScript = speechBubble.GetComponent<SpeechBubbleController>();
+
+            if (bubbleScript != null)
+            {
+                // 2. Now you can call SetIcon because bubbleScript IS a SpeechBubbleController
+                bubbleScript.ShowIcon(icon);
+                speechBubble.SetActive(true);
+            }
+            else
+            {
+                Debug.LogError("The speechBubble GameObject is missing the SpeechBubbleController script!");
+            }
+        } else
+        {
+            Debug.Log("Speechbubble is null, error");
+        }
+
+        if (speechBubbleController != null)
+        {
+            // FORCE ACTIVE: This helps override external systems (like the tutorial) 
+            // that might have disabled the object.
+            speechBubble.SetActive(true);
+
+            speechBubbleController.ShowSpeechBubble(icon);
+        }
     }
 
     public IEnumerator WaitForConditionWithIcon(SpeechBubbleController.BubbleIcon icon, int waitTime, System.Func<bool> predicate)

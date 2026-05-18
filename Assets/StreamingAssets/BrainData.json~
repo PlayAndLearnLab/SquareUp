@@ -1,0 +1,22 @@
+{
+    "keywords": [
+	{ "keyword": "coffee", "suggestedCaffeine": 1, "suggestedTemp": 0.0, "suggestedProfile": 0.0, "weight": 0.1 },
+	{ "keyword": "hot", "suggestedCaffeine": 0, "suggestedTemp": 0.0, "suggestedProfile": 0.5, "weight": 0.1 },
+	{ "keyword": "sweet", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 1.0, "weight": 0.1 },
+	{ "keyword": "iced", "suggestedCaffeine": 0, "suggestedTemp": 1.0, "suggestedProfile": 0.5, "weight": 0.1 },
+	{ "keyword": "latte", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1 },
+	{ "keyword": "cold", "suggestedCaffeine": 0, "suggestedTemp": 1.0, "suggestedProfile": 0.5, "weight": 0.1 },
+	{ "keyword": "apple", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1 },
+	{ "keyword": "earthy", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.0, "weight": 0.1 },
+	{ "keyword": "no caffeine", "suggestedCaffeine": -1, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1 },
+	{ "keyword": "pumpkin", "suggestedCaffeine": -1, "suggestedTemp": 0.0, "suggestedProfile": 1, "weight": 0.1 },
+	{ "keyword": "chocolate", "suggestedCaffeine": -1, "suggestedTemp": 0.0, "suggestedProfile": 0.5, "weight": 0.1 },
+	{ "keyword": "vibrant", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 0.0, "weight": 0.1 },
+	{ "keyword": "fruit", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 1.0, "weight": 0.1 },
+	{ "keyword": "chilled", "suggestedCaffeine": 0, "suggestedTemp": 1.0, "suggestedProfile": 0.5, "weight": 0.1 },
+	{ "keyword": "energy", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 0.0, "weight": 0.1 },
+	{ "keyword": "boost", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 0.0, "weight": 0.1 },
+	{ "keyword": "bold", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1 },
+	{ "keyword": "bitter", "suggestedCaffeine": 1, "suggestedTemp": 0.5, "suggestedProfile": 0.0, "weight": 0.1 }
+  ]
+}

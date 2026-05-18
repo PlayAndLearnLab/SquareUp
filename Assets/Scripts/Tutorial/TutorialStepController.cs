@@ -5,8 +5,11 @@ using System.Text;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
-public class TutorialStepController : MonoBehaviour
+
+
+public class TutorialStepController : MonoBehaviour, IPointerClickHandler
 {
     public int step;
 
@@ -162,11 +165,19 @@ public class TutorialStepController : MonoBehaviour
         #endif
     }
 
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (!useButton && isShowing)
+        {
+            EventManager.current.TutorialStepCompleted(step);
+        }
+    }
+
     private void HideTutorialStep(bool useCoroutine = true)
     {
         Debug.Log($"[TutorialStep {step}] HideTutorialStep called with useCoroutine={useCoroutine}");
         isShowing = false;
-        if (useCoroutine)
+        if (useCoroutine && gameObject.activeInHierarchy)
         {
             //Debug.Log($"[TutorialStep {step}] Starting visibility coroutine for hiding");
             StartCoroutine(ApplyVisibilityChanges(false));

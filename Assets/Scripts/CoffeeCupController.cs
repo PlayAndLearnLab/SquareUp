@@ -9,11 +9,35 @@ public class CoffeeCupController : MonoBehaviour
     [SerializeField] private float dragAmount = 2f;
     [SerializeField] private float maxSpeed = 5f;
 
+    // Latte,
+    //CaramelMacchiato,
+    //PupmkinTea,
+    //AppleMatcha,
+    //PeppermintChoc,
+    //Decaf
+    public GameObject candyLatteIcon;
+    public GameObject herbalTeaIcon;
+    public GameObject pupmkinTeaIcon;
+    public GameObject appleMatchaIcon;
+    public GameObject chocolateIcon;
+    public GameObject coffeeIcon;
+
+
     public GameObject candyIcon;
     public GameObject appleIcon;
     public GameObject pumpkinIcon;
     public GameObject skullIcon;
+    public GameObject hotAppleIcon;
+    public GameObject coldAppleIcon;
+    public GameObject hotCandyIcon;
+    public GameObject coldCandyIcon;
+    public GameObject hotPumpkinIcon;
+    public GameObject coldPumpkinIcon;
     private CoffeeFlavor currentCoffeeType;
+
+    [Header("Temperature Indicators")]
+    public GameObject fireIcon;
+    public GameObject iceIcon;
 
     [SerializeField] private GameObject explosionEffectPrefab;
     [SerializeField] private AudioClip explosionSound;
@@ -27,6 +51,20 @@ public class CoffeeCupController : MonoBehaviour
         candyIcon.SetActive(false);
         appleIcon.SetActive(false);
         pumpkinIcon.SetActive(false);
+        hotAppleIcon.SetActive(false);
+        coldAppleIcon.SetActive(false);
+        hotCandyIcon.SetActive(false);
+        coldCandyIcon.SetActive(false);
+        hotPumpkinIcon.SetActive(false);
+        coldPumpkinIcon.SetActive(false);
+        candyLatteIcon.SetActive(false);
+        herbalTeaIcon.SetActive(false);
+        pupmkinTeaIcon.SetActive(false);
+        appleMatchaIcon.SetActive(false);
+        chocolateIcon.SetActive(false);
+        coffeeIcon.SetActive(false);
+        fireIcon.SetActive(false);
+        iceIcon.SetActive(false);
         spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
@@ -45,10 +83,48 @@ public class CoffeeCupController : MonoBehaviour
         appleIcon.SetActive(false);
         pumpkinIcon.SetActive(false);
         skullIcon.SetActive(false);
+        hotAppleIcon.SetActive(false);
+        coldAppleIcon.SetActive(false);
+        hotCandyIcon.SetActive(false);
+        coldCandyIcon.SetActive(false);
+        hotPumpkinIcon.SetActive(false);
+        coldPumpkinIcon.SetActive(false);
+        candyLatteIcon.SetActive(false);
+        herbalTeaIcon.SetActive(false);
+        pupmkinTeaIcon.SetActive(false);
+        appleMatchaIcon.SetActive(false);
+        chocolateIcon.SetActive(false);
+        coffeeIcon.SetActive(false);
+        fireIcon.SetActive(false);
+        iceIcon.SetActive(false);
 
         // Show icon based on coffee flavor
         switch (coffee.flavor)
         {
+            // Latte,
+            //CaramelMacchiato,
+            //PupmkinTea,
+            //AppleMatcha,
+            //PeppermintChoc,
+            //Decaf
+            case CoffeeFlavor.CandyLatte:
+                candyLatteIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.HerbalTea:
+                herbalTeaIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.PumpkinTea:
+                pupmkinTeaIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.AppleMatcha:
+                appleMatchaIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.Chocolate:
+                chocolateIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.Coffee:
+               coffeeIcon.SetActive(true);
+                break;
             case CoffeeFlavor.Candy:
                 candyIcon.SetActive(true);
                 break;
@@ -61,6 +137,30 @@ public class CoffeeCupController : MonoBehaviour
             case CoffeeFlavor.Poison:
                 skullIcon.SetActive(true);
                 break;
+            case CoffeeFlavor.HotApple:
+                hotAppleIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.ColdApple:
+                coldAppleIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.ColdCandy:
+                coldCandyIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.HotCandy:
+                hotCandyIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.HotPumpkin:
+                hotPumpkinIcon.SetActive(true);
+                break;
+            case CoffeeFlavor.ColdPumpkin:
+                coldPumpkinIcon.SetActive(true);
+                break;
+        }
+
+        if ((coffee.flavor == CoffeeFlavor.CandyLatte) || (coffee.flavor == CoffeeFlavor.HerbalTea) || (coffee.flavor == CoffeeFlavor.PumpkinTea) || (coffee.flavor == CoffeeFlavor.AppleMatcha) || (coffee.flavor == CoffeeFlavor.Chocolate) || (coffee.flavor == CoffeeFlavor.Coffee))
+        {
+            if (fireIcon != null) fireIcon.SetActive(coffee.temperature <= 0.5f);
+            if (iceIcon != null) iceIcon.SetActive(coffee.temperature > 0.5f);
         }
     }
 

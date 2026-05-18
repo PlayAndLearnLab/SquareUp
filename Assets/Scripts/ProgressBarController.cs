@@ -8,7 +8,7 @@ public class ProgressBarController : MonoBehaviour
     private Transform progressBarTranform;
     private float time = 0;
     public bool waitDone = false;
-    private float duration = 0;
+    public float duration = 0;
     private void Awake()
     {
         gameObject.SetActive(true);
@@ -41,16 +41,33 @@ public class ProgressBarController : MonoBehaviour
 
     public void UpdateProgressBar(float time)
     {
-        if (gameObject.activeSelf && time > 0.001f)
+        if (duration <= 0)
         {
-            float progress = Mathf.Min(time, duration);
-            
-            float xScale = progress / duration;
-            xScale = Mathf.Clamp01(xScale);
-            
-            progressBarTranform.localScale = new Vector2(1 - xScale, 0.74f);
+            duration = 1.0f; // Fallback to a tiny duration so we don't break the math
+        }
 
-            progressBarSprite.color = ColorProgressMap(1 - xScale);
+        //if (gameObject.activeSelf && time > 0.001f)
+        if (gameObject.activeSelf)
+        {
+            // 'time' is the elapsed time (e.g. 1.5 seconds)
+            // 'duration' is the total time (e.g. 3.0 seconds)
+            float progressFraction = Mathf.Clamp01(time / duration);
+
+            // 0.0 to 1.0 scale
+            float xScale = 1 - progressFraction;
+
+            progressBarTranform.localScale = new Vector2(xScale, 0.74f);
+            progressBarSprite.color = ColorProgressMap(xScale);
+
+
+            //float progress = Mathf.Min(time, duration);
+
+            //float xScale = progress / duration;
+            //xScale = Mathf.Clamp01(xScale);
+
+            //progressBarTranform.localScale = new Vector2(1 - xScale, 0.74f);
+
+            //progressBarSprite.color = ColorProgressMap(1 - xScale);
         }
     }
 

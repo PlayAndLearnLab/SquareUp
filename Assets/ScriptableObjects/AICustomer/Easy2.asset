@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52834f35ed8743b281c485c2838cc02, type: 3}
+  m_Name: Easy2
+  m_EditorClassIdentifier: 
+  customerName: Easy2
+  customerPrefab: {fileID: 4859628348575727275, guid: 93a88b7eb5d0a417fb1f05e064d8fd1f, type: 3}
+  moneyReward: 15
+  customerType: 0
+  favoriteTemp: 1
+  orderDialogue: Can I get something really sweet? Like an iced latte?
+  orderAudio: {fileID: 8300000, guid: f8c89c749281b45948c92876c37c9090, type: 3}
+  aiConfidence: 0.5
+  expectedFlavor: 0
+  expectedTemp: 1

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52834f35ed8743b281c485c2838cc02, type: 3}
+  m_Name: Medium 2
+  m_EditorClassIdentifier: 
+  customerName: Medium2
+  customerPrefab: {fileID: 1149934953509376464, guid: 37fbb5130fa864251af885b65e0b2228, type: 3}
+  moneyReward: 15
+  customerType: 1
+  favoriteTemp: 0
+  orderDialogue: I need a sweet pumpkin treat.
+  orderAudio: {fileID: 8300000, guid: d236fb5ef98c24f11b7a802143436458, type: 3}
+  aiConfidence: 0.5
+  expectedFlavor: 2
+  expectedTemp: 0

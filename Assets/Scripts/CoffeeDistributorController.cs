@@ -34,6 +34,14 @@ public class CoffeeDistributorController : MonoBehaviour
     private float currentAccuracy;
     public float CurrentAccuracy { get => currentAccuracy; private set => currentAccuracy = Mathf.Clamp(value, 0f, 100f); }
 
+    private bool _firstCoffeeOfLevelMade = false;
+
+    [Header("Manual Brewing State")]
+    private CoffeeFlavor? selectedFlavor = null;
+    private float? selectedTemperature = null; // 0 for Cold, 1 for Hot
+
+    
+
     void Start()
     {
         // Initialize new Speed and Accuracy
@@ -90,6 +98,50 @@ public class CoffeeDistributorController : MonoBehaviour
         }
     }
 
+    // Call this from your Beverage Buttons
+    public void SetSelectedFlavor(int flavorIndex)
+    {
+        selectedFlavor = (CoffeeFlavor)flavorIndex;
+        CheckAndStartBrew();
+    }
+
+    // Call this from your Hot/Cold Buttons
+    public void SetSelectedTemperature(float temp)
+    {
+        selectedTemperature = temp;
+        CheckAndStartBrew();
+    }
+
+    private void CheckAndStartBrew()
+    {
+        if (selectedFlavor.HasValue && selectedTemperature.HasValue)
+        {
+            Coffee finalCoffee = new Coffee(selectedFlavor.Value, selectedTemperature.Value);
+
+            CoffeeBrain brain = FindObjectOfType<CoffeeBrain>();
+            if (brain != null)
+            {
+                brain.ManualSelectFlavor(finalCoffee.flavor, finalCoffee.temperature);
+            }
+
+            StartManualBrewNoPoison(finalCoffee);
+
+            // Reset for next manual order
+            selectedFlavor = null;
+            selectedTemperature = null;
+        }
+    }
+
+    public void StartManualBrew(Coffee coffee)
+    {
+        StartCoroutine(GiveCoffeeSequence(coffee));
+    }
+
+    public void StartManualBrewNoPoison(Coffee coffee)
+    {
+        StartCoroutine(GiveCoffeeNoPoisonSequence(coffee));
+    }
+
     private void GiveCoffee(Coffee coffee)
     {
         // Don't start making coffee if the day is over
@@ -103,9 +155,41 @@ public class CoffeeDistributorController : MonoBehaviour
         StartCoroutine(GiveCoffeeSequence(coffee));
     }
 
+    private void GiveCoffeeNoPoison(Coffee coffee)
+    {
+        // Don't start making coffee if the day is over
+        if (_isDayOver)
+        {
+            Debug.Log("Day is over. Not starting new coffee production.");
+            // Optionally, trigger an event or feedback if needed
+            return;
+        }
+
+        StartCoroutine(GiveCoffeeNoPoisonSequence(coffee));
+    }
+
+    
+
     private IEnumerator GiveCoffeeSequence(Coffee coffee)
     {
         _interruptRequested = false; // Reset interrupt flag at the start
+
+        GM gameManager = FindObjectOfType<GM>();
+
+        bool isAiDayZero = false;
+
+        if (gameManager != null)
+        {
+            // Check if it's an AI Level AND Day 0
+            if (gameManager.IsAILevel && gameManager.day == 0)
+            {
+                isAiDayZero = true;
+            }
+        }
+
+        bool forceSuccess = (isAiDayZero && !_firstCoffeeOfLevelMade);
+
+        Debug.Log($"First cup of coffee? : forceSuccess = {forceSuccess} because isAiDayZero = {isAiDayZero} and first coffe already made = {_firstCoffeeOfLevelMade}");
 
         EventManager.current.CoffeeOrderPressed();
         Debug.Log("Shaking...");
@@ -169,10 +253,16 @@ public class CoffeeDistributorController : MonoBehaviour
         if (_interruptRequested) { HandleInterrupt(); yield break; }
 
         bool isInTutorialAndExplodeCoffee = TutorialHelper.IsInTutorial && TutorialHelper.explodeCoffee;
+        bool shouldMalfunction = (TutorialHelper.IsInTutorial && TutorialHelper.explodeCoffee && !forceSuccess) ||
+                             (!TutorialHelper.IsInTutorial && !forceSuccess && (Random.Range(0f, 100f) > CurrentAccuracy && !isTesting));
+        Debug.Log($"shouldmalfunction = {shouldMalfunction}");
+        Debug.Log($"(TutorialHelper.IsInTutorial && TutorialHelper.explodeCoffee) = {(TutorialHelper.IsInTutorial && TutorialHelper.explodeCoffee)}");
+        Debug.Log($"(!TutorialHelper.IsInTutorial && !forceSuccess && (Random.Range(0f, 100f) > CurrentAccuracy && !isTesting)) = {(!TutorialHelper.IsInTutorial && !forceSuccess && (Random.Range(0f, 100f) > CurrentAccuracy && !isTesting))}");
         // Check for malfunction at the end of the sequence
         // Malfunction chance now directly uses CurrentAccuracy (higher accuracy = lower failure chance)
-        if ((TutorialHelper.IsInTutorial && TutorialHelper.explodeCoffee) || (!TutorialHelper.IsInTutorial && (Random.Range(0f, 100f) > CurrentAccuracy && !isTesting)))
+        if (shouldMalfunction)
         {
+            _firstCoffeeOfLevelMade = true;
             Debug.Log("Coffee machine malfunctioned!");
             TutorialHelper.QueueTutorialStep(4);
             TutorialHelper.SetExplodeCoffee(false);
@@ -249,7 +339,8 @@ public class CoffeeDistributorController : MonoBehaviour
         GameObject coffeeCup = Instantiate(coffeeCupPrefab, spawnPoint.transform.position, Quaternion.identity);
         coffeeCup.SetActive(true);
         coffeeCup.GetComponent<CoffeeCupController>().GiveCoffee(coffee);
-        
+        _firstCoffeeOfLevelMade = true;
+
         // Hide the progress bar
         if (progressBar != null)
         {
@@ -257,6 +348,112 @@ public class CoffeeDistributorController : MonoBehaviour
         }
         EventManager.current.CoffeeProduced(coffee);
     }
+
+
+
+    private IEnumerator GiveCoffeeNoPoisonSequence(Coffee coffee)
+    {
+        _interruptRequested = false; // Reset interrupt flag at the start
+
+        GM gameManager = FindObjectOfType<GM>();
+
+        bool isAiDayZero = false;
+
+        if (gameManager != null)
+        {
+            // Check if it's an AI Level AND Day 0
+            if (gameManager.IsAILevel && gameManager.day == 0)
+            {
+                isAiDayZero = true;
+            }
+        }
+
+        bool forceSuccess = (isAiDayZero && !_firstCoffeeOfLevelMade);
+
+        //Debug.Log($"First cup of coffee? : forceSuccess = {forceSuccess} because isAiDayZero = {isAiDayZero} and first coffe already made = {_firstCoffeeOfLevelMade}");
+
+        EventManager.current.CoffeeOrderPressed();
+        Debug.Log("Shaking...");
+        // Calculate shake duration based on speed
+        // Higher speed = shorter duration
+        // At speed 0: duration is 10x base duration
+        // At speed 100: duration is 0.5x base duration
+        float baseShakeDuration = 1f; // Define a base duration
+        float speedFactor = Mathf.Lerp(10f, 0.5f, CurrentSpeed / 100f); // Use CurrentSpeed
+        float shakeDuration = baseShakeDuration * speedFactor;
+
+        // // Start the progress bar using the existing implementation - do this once before any branches
+        // if (progressBar != null)
+        // {
+        //     // Convert shake duration to int seconds for the progress bar, ensure at least 1 second
+        //     int progressBarDuration = Mathf.Max(1, Mathf.CeilToInt(shakeDuration));
+        //     StartCoroutine(progressBar.StartProgressBarAndWait(progressBarDuration));
+        // }
+
+        AudioSource.PlayClipAtPoint(hydraulicSound, spawnPoint.transform.position);
+
+        // Start shake animation
+        StartCoroutine(ShakeAnimation(shakeDuration, 1f));
+
+        // Check for interrupt before gear animation
+        if (_interruptRequested) { HandleInterrupt(); yield break; }
+
+        // Handle gear animation if it exists
+        if (activeGears.Count > 0)
+        {
+            // Adjust rotation speed based on distributor speed
+            float rotationMultiplier = Mathf.Lerp(0.5f, 2f, CurrentSpeed / 100f); // Use CurrentSpeed
+            float totalRotation = -360f * rotationMultiplier;
+
+            // Start rotation for all gears simultaneously
+            List<Coroutine> rotationCoroutines = new List<Coroutine>();
+            foreach (GameObject gear in activeGears)
+            {
+                if (gear != null)
+                {
+                    rotationCoroutines.Add(StartCoroutine(RotateAnimation(gear, totalRotation, shakeDuration)));
+                }
+            }
+
+            // Wait for all gear rotations to complete
+            foreach (Coroutine routine in rotationCoroutines)
+            {
+                yield return routine;
+                // Check for interrupt after each gear rotation finishes (optional, but allows faster response)
+                if (_interruptRequested) { HandleInterrupt(); yield break; }
+            }
+        }
+        else
+        {
+            // If no gears, just wait the same duration
+            yield return new WaitForSeconds(shakeDuration);
+            Debug.LogWarning("No active gears found to rotate!");
+        }
+
+        // Check for interrupt
+        if (_interruptRequested) { HandleInterrupt(); yield break; }
+
+
+        AudioSource.PlayClipAtPoint(popSound, spawnPoint.transform.position);
+        GameObject coffeeCup = Instantiate(coffeeCupPrefab, spawnPoint.transform.position, Quaternion.identity);
+        coffeeCup.SetActive(true);
+        coffeeCup.GetComponent<CoffeeCupController>().GiveCoffee(coffee);
+        _firstCoffeeOfLevelMade = true;
+
+        // Hide the progress bar
+        if (progressBar != null)
+        {
+            progressBar.HideProgressBar();
+        }
+        Debug.Log("Coffee is produced");
+        EventManager.current.CoffeeProduced(coffee);
+    }
+
+
+
+
+
+
 
     private IEnumerator ShakeAnimation(float duration, float intensityMultiplier = 1f)
     {
@@ -454,6 +651,7 @@ public class CoffeeDistributorController : MonoBehaviour
     {
         Debug.Log("Coffee Distributor: Starting new day.");
         _isDayOver = false;
+        _firstCoffeeOfLevelMade = false;
         // Reset any other day-specific state if necessary
     }
 }

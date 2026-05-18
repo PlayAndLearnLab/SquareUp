@@ -16,6 +16,7 @@ public class EventManager : MonoBehaviour
     public event Action<int> onTutorialStepReady;
     public event Action<int> onDayStarted;
     public event Action onDayCompleted;
+    public event Action onBubbleClicked;
     public event Action onTestingStarted;
     public event Action onTestingCompleted;
     public event Action<string> onModelPrediction;
@@ -23,6 +24,7 @@ public class EventManager : MonoBehaviour
     public event Action onTimerPaused;
     public event Action onTimerResumed;
     public event Action onCustomerSaved;
+    public event Action onAnalyticsClosed;
 
     // Shop events
     public event Action onShopOpened;
@@ -31,7 +33,9 @@ public class EventManager : MonoBehaviour
 
     // Slide display event
     public event Action<IntroSlidesData> onSlideDisplayRequested;
+
     
+
     // Slideshow completion event
     public event Action<IntroSlidesData> onSlideshowCompleted;
     
@@ -102,6 +106,42 @@ public class EventManager : MonoBehaviour
             case "pumpkin":
                 GiveCoffee(new Coffee(CoffeeFlavor.Pumpkin, temperature));
                 break;
+            case "hot apple":
+                GiveCoffee(new Coffee(CoffeeFlavor.HotApple, temperature));
+                break;
+            case "cold apple":
+                GiveCoffee(new Coffee(CoffeeFlavor.ColdApple, temperature));
+                break;
+            case "hot candy":
+                GiveCoffee(new Coffee(CoffeeFlavor.HotCandy, temperature));
+                break;
+            case "cold candy":
+                GiveCoffee(new Coffee(CoffeeFlavor.ColdCandy, temperature));
+                break;
+            case "hot pumpkin":
+                GiveCoffee(new Coffee(CoffeeFlavor.HotPumpkin, temperature));
+                break;
+            case "cold pumpkin":
+                GiveCoffee(new Coffee(CoffeeFlavor.ColdPumpkin, temperature));
+                break;
+            case "candy latte":
+                GiveCoffee(new Coffee(CoffeeFlavor.CandyLatte, temperature));
+                break;
+            case "herbal tea":
+                GiveCoffee(new Coffee(CoffeeFlavor.HerbalTea, temperature));
+                break;
+            case "pumpkin tea":
+                GiveCoffee(new Coffee(CoffeeFlavor.PumpkinTea, temperature));
+                break;
+            case "apple matcha":
+                GiveCoffee(new Coffee(CoffeeFlavor.AppleMatcha, temperature));
+                break;
+            case "chocolate":
+                GiveCoffee(new Coffee(CoffeeFlavor.Chocolate, temperature));
+                break;
+            case "coffee":
+                GiveCoffee(new Coffee(CoffeeFlavor.Coffee, temperature));
+                break;
         }
     }
 
@@ -119,10 +159,16 @@ public class EventManager : MonoBehaviour
         onCoffeeOrderPressed?.Invoke();
     }
 
+    public void BubbleClicked()
+    {
+        onBubbleClicked?.Invoke();
+    }
+
     public void CoffeeReadyForCustomer(Coffee coffee, GameObject coffeeObject)
     {
         gameState.AddCoffee(coffeeObject, coffee);
-        Debug.Log("Coffee ready for customer: " + coffee.flavor);
+        Debug.Log("Coffee ready for customer: " + coffee.flavor + coffee.temperature
+            );
         onCoffeeReadyForCustomer?.Invoke(coffee);
     }
 
@@ -143,6 +189,7 @@ public class EventManager : MonoBehaviour
 
     public void TutorialStepCompleted(int step) 
     {
+        Debug.Log($"Tutorial step completed: {step}");
         onTutorialStepCompleted?.Invoke(step);
     }
     public void TutorialStepStarted(int step)
@@ -275,20 +322,20 @@ public class EventManager : MonoBehaviour
     // New methods for correct coffee decisions
     public void CorrectlyApprovedCoffee()
     {
-        Debug.Log("EventManager: Correctly approved good coffee");
+        //Debug.Log("EventManager: Correctly approved good coffee");
         onCorrectlyApprovedCoffee?.Invoke();
     }
     
     public void CorrectlyDeniedCoffee()
     {
-        Debug.Log("EventManager: Correctly denied bad coffee");
+        //Debug.Log("EventManager: Correctly denied bad coffee");
         onCorrectlyDeniedCoffee?.Invoke();
     }
     
     // Customer tracking methods
     public void IncrementCustomerCount()
     {
-        Debug.Log("EventManager: Customer served");
+        //Debug.Log("EventManager: Customer served");
         onCustomerServed?.Invoke();
     }
     
@@ -307,7 +354,7 @@ public class EventManager : MonoBehaviour
 
     public void ItemEnqueued(CoffeeOrder order)
     {
-        Debug.Log("EventManager: Item enqueued to queue: " + order.Coffee.flavor + " " + order);
+        //Debug.Log("EventManager: Item enqueued to queue: " + order.Coffee.flavor + " " + order);
         onItemEnqueued?.Invoke(order);
     }
 
@@ -334,8 +381,13 @@ public class EventManager : MonoBehaviour
     }
 
     public void CustomerSaved()
-    {
+    { 
         onCustomerSaved?.Invoke();
+    }
+
+    public void AnalyticsClosed()
+    {
+        onAnalyticsClosed?.Invoke();
     }
 
     // Method to trigger the new event

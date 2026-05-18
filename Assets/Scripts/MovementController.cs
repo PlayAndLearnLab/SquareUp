@@ -10,6 +10,9 @@ public class MovementController : MonoBehaviour
     private Vector3 deltaTransform;
     public int speed;
 
+    public bool old_IsMoving => deltaTransform != Vector3.zero;
+    public bool IsMoving => deltaTransform.sqrMagnitude > 0.0001f;
+
     public void Awake()
     {
         objTransform = GetComponent<Transform>();
@@ -18,7 +21,10 @@ public class MovementController : MonoBehaviour
 
     public void FixedUpdate()
     {
-        objTransform.position += deltaTransform;
+        if (objTransform != null && deltaTransform != Vector3.zero)
+        {
+            objTransform.position += deltaTransform;
+        }
     }
 
     public virtual IEnumerator WalkTo(Vector3 targetPos, int speed)
@@ -31,19 +37,32 @@ public class MovementController : MonoBehaviour
         Vector3 directionVector = differenceVector.normalized;
         deltaTransform = directionVector * normalizedSpeed;
 
+        float stoppingDistance = deltaTransform.magnitude;
+
         while (objTransform != null)
         {
-            if (Vector3.Distance(objTransform.position, targetPos) <= deltaTransform.magnitude)
+            if (Vector3.Distance(objTransform.position, targetPos) <= stoppingDistance)
             {
                 break;
             }
             yield return null;
         }
 
-        if (objTransform != null)
+        StopMovement(targetPos);
+
+        //if (objTransform != null)
+        //{
+        //    deltaTransform = new Vector3(0, 0, 0);
+        //    objTransform.position = targetPos;
+        //}
+    }
+
+    public void StopMovement(Vector3? finalSnapPosition = null)
+    {
+        deltaTransform = Vector3.zero;
+        if (finalSnapPosition.HasValue && objTransform != null)
         {
-            deltaTransform = new Vector3(0, 0, 0);
-            objTransform.position = targetPos;
+            objTransform.position = finalSnapPosition.Value;
         }
     }
 
@@ -66,5 +85,8 @@ public class MovementController : MonoBehaviour
         yield return WalkTo(objTransform.position + pathVector, speed);
     }
 
-
+    private void OnDisable()
+    {
+        deltaTransform = Vector3.zero;
+    }
 }

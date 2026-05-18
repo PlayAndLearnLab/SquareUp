@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52834f35ed8743b281c485c2838cc02, type: 3}
+  m_Name: Easy3
+  m_EditorClassIdentifier: 
+  customerName: Easy3
+  customerPrefab: {fileID: 4679703325945052715, guid: 7e654f60d1aef43abae9d706c6cb552b, type: 3}
+  moneyReward: 15
+  customerType: 0
+  favoriteTemp: 1
+  orderDialogue: Can I get a cold apple drink?
+  orderAudio: {fileID: 8300000, guid: 03d8568aa0a0b4092bc5663b0d8a61d0, type: 3}
+  aiConfidence: 0.5
+  expectedFlavor: 3
+  expectedTemp: 1

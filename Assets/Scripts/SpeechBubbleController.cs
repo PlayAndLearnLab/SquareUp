@@ -8,6 +8,7 @@ public class SpeechBubbleController : MonoBehaviour
     public GameObject activeSpeakerIcon;
     public GameObject inactiveSpeakerIcon;
     public GameObject commentIcon;
+    public CoffeeBrain brain = null;
 
     public SpriteRenderer replacementSprite;
 
@@ -38,9 +39,16 @@ public class SpeechBubbleController : MonoBehaviour
 
     private void OnBubbleClicked()
     {
+        if (brain != null && brain.IsBusy)
+        {
+            Debug.Log("Bubble click ignored: AI Brain is busy.");
+            return;
+        }
+
         clicked = true;
         timer = 0;
         Debug.Log("Bubble clicked");
+        EventManager.current.BubbleClicked();
         if (waitingForCondition) {
             Debug.Log("Bubble clicked: Customer saved");
             EventManager.current.CustomerSaved();
@@ -50,7 +58,9 @@ public class SpeechBubbleController : MonoBehaviour
 
     private void Awake()
     {
-        gameObject.SetActive(true);
+        timer = 0;
+
+        //gameObject.SetActive(true);
 
         speechBubbleCollider = gameObject.GetComponent<OnColliderClicked>();
         speechBubbleCollider.clickAction = OnBubbleClicked;
@@ -63,13 +73,20 @@ public class SpeechBubbleController : MonoBehaviour
         commentIcon.SetActive(false);
 
         audioSource = gameObject.GetComponent<AudioSource>();
+
+        //gameObject.SetActive(false);
     }
 
     void FixedUpdate()
     {
+        if (!gameObject.activeSelf) return;
+
         progressBarController.UpdateProgressBar(timer);
         timer += Time.deltaTime;
-        timer = Mathf.Min(timer, timeFloor);
+        if (timeFloor > 0)
+        {
+            timer = Mathf.Min(timer, timeFloor);
+        }
     }
 
     private void HideAllIcons()
@@ -81,7 +98,7 @@ public class SpeechBubbleController : MonoBehaviour
         replacementSprite.sprite = null;
     }
 
-    private void ShowIcon(BubbleIcon icon)
+    public void ShowIcon(BubbleIcon icon)
     {
         HideAllIcons();
         switch (icon)
@@ -112,6 +129,8 @@ public class SpeechBubbleController : MonoBehaviour
 
     public void HideSpeechBubble()
     {
+        timer = 0;         // reset so the next customer starts clean
+        clicked = false;
         gameObject.SetActive(false);
     }
 

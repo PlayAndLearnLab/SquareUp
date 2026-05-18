@@ -12,9 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8d7f27069c59e458aa224f8b00776315, type: 3}
   m_Name: Candy
   m_EditorClassIdentifier: 
+  customerName: 
   customerType: 1
-  expectedFlavor: 0
-  expectedFlavorSprite: {fileID: 21300000, guid: 4ae533ce3ffda4f9d87a1c1625694a81, type: 3}
-  expectedFlavorAudio: {fileID: 8300000, guid: b5e340b5d24984b61bac027307406d12, type: 3}
   customerPrefab: {fileID: 4679703325945052715, guid: 7e654f60d1aef43abae9d706c6cb552b, type: 3}
   moneyReward: 15
+  expectedFlavor: 6
+  favoriteTemp: 0
+  dislikedFlavors: 
+  successfulServings: 0
+  aiConfidence: 0.1
+  expectedFlavorSprite: {fileID: 21300000, guid: 4ae533ce3ffda4f9d87a1c1625694a81, type: 3}
+  expectedFlavorAudio: {fileID: 8300000, guid: b5e340b5d24984b61bac027307406d12, type: 3}

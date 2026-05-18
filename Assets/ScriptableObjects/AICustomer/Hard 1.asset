@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c52834f35ed8743b281c485c2838cc02, type: 3}
+  m_Name: Hard 1
+  m_EditorClassIdentifier: 
+  customerName: Hard1
+  customerPrefab: {fileID: 9023645092759592121, guid: 21a97f9cce2504caf9a219efa27fc184, type: 3}
+  moneyReward: 15
+  customerType: 0
+  favoriteTemp: 1
+  orderDialogue: I need a vibrant fruit drink, chilled.
+  orderAudio: {fileID: 8300000, guid: ec4e0ae2f170047ad9c07c45309bca55, type: 3}
+  aiConfidence: 0.5
+  expectedFlavor: 3
+  expectedTemp: 1

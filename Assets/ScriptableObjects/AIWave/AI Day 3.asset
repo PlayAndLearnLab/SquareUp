@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ff8795d078564425da0dc40b3913a4c0, type: 3}
+  m_Name: AI Day 3
+  m_EditorClassIdentifier: 
+  customers:
+  - {fileID: 11400000, guid: 7471fd8cfbd3d4e6d807586bd5f16832, type: 2}
+  - {fileID: 11400000, guid: 6c89ae1207fd346eb85693c304108596, type: 2}
+  - {fileID: 11400000, guid: ef18c48e1982f4780a3dd5ba7dff2e68, type: 2}
+  - {fileID: 11400000, guid: 954ff2b620b2640d2b3e55f37991bc28, type: 2}
+  - {fileID: 11400000, guid: 7471fd8cfbd3d4e6d807586bd5f16832, type: 2}
+  - {fileID: 11400000, guid: ab7a5fe5f84254ed7988da584f453c73, type: 2}
+  - {fileID: 11400000, guid: 954ff2b620b2640d2b3e55f37991bc28, type: 2}
+  - {fileID: 11400000, guid: 8ac2f046dc73c45f0ab4ecd6fc22c8d9, type: 2}
+  timeBetweenCustomers: 3
+  intervalRandomness: 0

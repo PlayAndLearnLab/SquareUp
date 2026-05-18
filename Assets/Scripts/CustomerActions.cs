@@ -107,7 +107,8 @@ public class CustomerActions : MonoBehaviour
         GameObject customerObject = Instantiate(customer.customerPrefab, transform);
 
         // Set the transform values
-        customerObject.transform.localPosition = new Vector3(0.79f, 1.7f, 0.0001525647f);
+        //customerObject.transform.localPosition = new Vector3(0.79f, 1.7f, 0.0001525647f);
+        customerObject.transform.localPosition = new Vector3(0.79f, 1.7f, 0f);
         customerObject.transform.localRotation = Quaternion.Euler(0, 1, 0);
         customerObject.transform.localScale = new Vector3(-3, 3, 3);
 
@@ -125,6 +126,8 @@ public class CustomerActions : MonoBehaviour
         // Get child with name "UnitRoot" and set animator
         Transform unitRoot = customerObject.transform.Find("UnitRoot");
         controller.SetAnimator(unitRoot.GetComponent<Animator>());
+
+        controller.RefreshReferences();
     }
     
     #endregion
@@ -167,8 +170,17 @@ public class CustomerActions : MonoBehaviour
             }
         }
     }
+
     private void OnApproveCoffee()
     {
+        if (this == null || !gameObject.activeInHierarchy) return;
+
+        if (customer == null)
+        {
+            Debug.Log($"[CustomerActions] Ignoring - No traditional customer data found.");
+            return;
+        }
+
         // --- DEBUG START ---
         string customerName = this.gameObject.name; // Assuming the GO name is useful
         MovementController thisController = this.controller; // Cache for logging
@@ -327,20 +339,64 @@ public class CustomerActions : MonoBehaviour
             moneyAnimation.SetAmount(amount);
         }
     }
-    
+
     #endregion
 
     #region Customer Workflows
-    
+
     /// <summary>
     /// Handles the main customer workflow in training mode
     /// </summary>
+    ///
+
     public IEnumerator StartTrainingActions()
     {
         if (isDestroyed) yield break;
 
+        if (featureLineController == null)
+        {
+            Debug.LogError($"FeatureLineController is missing on {gameObject.name}!");
+            yield break;
+        }
+
+        // Enqueue and wait inline — same pattern as AI customers
+        featureLineController.EnqueueCustomer(SPEED, controller);
+        float lineWaitStart = Time.time;
+        yield return new WaitUntil(() => {
+            if (isDestroyed) return true;
+            if (Time.time - lineWaitStart > 120f) return true;
+            int pos = featureLineController.GetPositionInLine(controller);
+            return pos == 1 || pos == -1;
+        });
+
+        if (isDestroyed) yield break;
+        if (featureLineController.GetPositionInLine(controller) != 1) yield break;
+
+        yield return HandleInitialInteraction();
+        if (isDestroyed) yield break;
+
+        MoveToWaitLine();
+        if (isDestroyed) yield break;
+
+        yield return WaitForCoffeeApproval();
+        if (isDestroyed) yield break;
+
+        yield return ProcessCoffeeOrder();
+    }
+
+
+    public IEnumerator old_StartTrainingActions()
+    {
+        if (isDestroyed) yield break;
+
+        if (featureLineController == null)
+        {
+            Debug.LogError($"FeatureLineController is missing on {gameObject.name}! Did you assign it in GM.cs?");
+            yield break;
+        }
+
         // Wait in the feature line
-        StartCoroutine(featureLineController.WaitInLine(SPEED, controller));
+        yield return StartCoroutine(featureLineController.WaitInLine(SPEED, controller));
         if (isDestroyed) yield break;
 
         // Initial interaction based on feature level
@@ -367,7 +423,7 @@ public class CustomerActions : MonoBehaviour
         }
         // For level 0, need to be clicked first
         bool clicked = false;
-        tutorialCoroutine = StartCoroutine(TutorialHelper.ShowTutorialStepUntil(1, () => clicked || isDestroyed));
+        //tutorialCoroutine = StartCoroutine(TutorialHelper.ShowTutorialStepUntil(1, () => clicked || isDestroyed));
         
         // Character waits to be clicked
         yield return controller.WaitForClickWithIcon(SpeechBubbleController.BubbleIcon.InactiveSpeaker, (int)(10 * waitTimeMultiplier), (bool wasClicked) =>
@@ -378,10 +434,12 @@ public class CustomerActions : MonoBehaviour
         if (isDestroyed) yield break;
         if (clicked)
         {
+            Debug.Log($"Customer clicked! Feature Level: {gm.GetFeatureLevel()}"); // DEBUG
             if (gm.GetFeatureLevel() == 0) 
             {
+                controller.ShowSpeechBubble(SpeechBubbleController.BubbleIcon.Comment);
                 yield return controller.PlayClip(customer.expectedFlavorAudio);
-                if (isDestroyed) yield break;
+                //if (isDestroyed) yield break;
             }
             else
             {
@@ -438,6 +496,14 @@ public class CustomerActions : MonoBehaviour
     }
 
     private void MoveToWaitLine()
+    {
+        ClearCoffeeGiven();
+        featureLineController.RemoveFromLine(controller);
+        controller.HideSpeechBubble();
+        waitLineController.EnqueueCustomer(SPEED, controller); // use EnqueueCustomer, not WaitInLine
+    }
+
+    private void old_MoveToWaitLine()
     {
         ClearCoffeeGiven();
         featureLineController.RemoveFromLine(controller);
