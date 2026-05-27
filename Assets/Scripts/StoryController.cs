@@ -10,6 +10,8 @@ public class StoryController : MonoBehaviour
 
     private void Start()
     {
+        Debug.Log($"[Debug] StoryController Start() is running on GameObject: {gameObject.name}. Active in Hierarchy: {gameObject.activeInHierarchy}");
+
         // Get the IntroController component from the GameObject
         if (introControllerObject != null)
         {
@@ -54,6 +56,7 @@ public class StoryController : MonoBehaviour
     // Event listener for slide display requests
     private void OnSlideDisplayRequested(IntroSlidesData slidesData)
     {
+        Debug.Log("Entering OnSlideDisplayRequested() from Story Controller");
         if (introController != null && introControllerObject != null)
         {
             Debug.Log("StoryController received slide display request. Forwarding to IntroController.");

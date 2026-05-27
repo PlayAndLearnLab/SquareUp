@@ -51,6 +51,10 @@ public class ShopController : MonoBehaviour
 
         // Get runtime copies of upgrades from the game state
         runtimeUpgrades = gameState.GetActiveUpgrades();
+        foreach (var up in runtimeUpgrades)
+        {
+            Debug.Log($"Upgrade Loaded: {up.name} | {up.category}");
+        }
         Debug.Log($"Retrieved {runtimeUpgrades.Length} available upgrades from game state");
 
         SetupGridLayout();

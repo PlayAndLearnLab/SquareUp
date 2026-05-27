@@ -268,6 +268,7 @@ public class EventManager : MonoBehaviour
     {
         Debug.Log($"EventManager: Firing RequestSlideDisplay event with slide data");
         onSlideDisplayRequested?.Invoke(slideData);
+        Debug.Log("Slide display requested");
     }
     
     // Slideshow completion method

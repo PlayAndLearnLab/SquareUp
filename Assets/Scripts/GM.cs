@@ -17,7 +17,7 @@ public class GM : MonoBehaviour, ShopController.IGameState
     [SerializeField] private AILevel[] ailevels;
     private int TotalLevelsCount => (ailevels != null && ailevels.Length > 0) ? ailevels.Length : levels.Length;
 
-    [SerializeField] private ShopUpgrade[] availableUpgrades;  // Reference to all possible upgrades
+    //[SerializeField] private ShopUpgrade[] availableUpgrades;  // Reference to all possible upgrades
     [SerializeField] private LineController featureLineController;
     [SerializeField] private LineController waitLineController;
     private int currentLevelIndex;
@@ -50,38 +50,63 @@ public class GM : MonoBehaviour, ShopController.IGameState
     private Dictionary<string, ShopUpgrade> activeUpgrades = new Dictionary<string, ShopUpgrade>();
     public bool IsAILevel => (ailevels != null && currentLevelIndex < ailevels.Length);
 
-    private void InitializeUpgrades()
+    private void InitializeUpgrades(ShopUpgrade[] upgradesToLoad)
     {
-        //Debug.Log($"Starting InitializeUpgrades. Available upgrades count: {availableUpgrades?.Length ?? 0}");
-
-        if (availableUpgrades == null || availableUpgrades.Length == 0)
-        {
-            //Debug.LogError("No available upgrades assigned in the Inspector!");
+        if (upgradesToLoad == null || upgradesToLoad.Length == 0)
             return;
-        }
 
-        // Clear existing upgrades to prevent duplicates
         activeUpgrades.Clear();
-        //Debug.Log("Cleared existing active upgrades");
 
-        // Create runtime copies of all available upgrades
-        foreach (var upgrade in availableUpgrades)
+        foreach (var upgrade in upgradesToLoad)
         {
-            if (upgrade != null)
-            {
-                var runtimeCopy = upgrade.CreateRuntimeCopy();
-                runtimeCopy.currentLevel = 0;  // Explicitly reset the level
-                activeUpgrades[upgrade.upgradeName] = runtimeCopy;
-                Debug.Log($"Added upgrade: {upgrade.upgradeName} to active upgrades. Current level: {runtimeCopy.currentLevel}");
-            }
-            else
-            {
-                Debug.LogWarning("Null upgrade found in availableUpgrades array!");
-            }
-        }
+            if (upgrade == null)
+                continue;
 
-        //Debug.Log($"Finished InitializeUpgrades. Total active upgrades: {activeUpgrades.Count}");
+            var runtimeCopy = upgrade.CreateRuntimeCopy();
+
+            string cleanName = upgrade.upgradeName.Replace("(Clone)", "").Trim();
+
+            runtimeCopy.upgradeName = cleanName;
+            runtimeCopy.currentLevel = 0;
+
+            activeUpgrades[cleanName] = runtimeCopy;
+
+            Debug.Log($"Loaded Upgrade: {cleanName}");
+        }
     }
+
+    //private void InitializeUpgrades()
+    //{
+    //    //Debug.Log($"Starting InitializeUpgrades. Available upgrades count: {availableUpgrades?.Length ?? 0}");
+
+    //    if (availableUpgrades == null || availableUpgrades.Length == 0)
+    //    {
+    //        //Debug.LogError("No available upgrades assigned in the Inspector!");
+    //        return;
+    //    }
+
+    //    // Clear existing upgrades to prevent duplicates
+    //    activeUpgrades.Clear();
+    //    //Debug.Log("Cleared existing active upgrades");
+
+    //    // Create runtime copies of all available upgrades
+    //    foreach (var upgrade in availableUpgrades)
+    //    {
+    //        if (upgrade != null)
+    //        {
+    //            var runtimeCopy = upgrade.CreateRuntimeCopy();
+    //            runtimeCopy.currentLevel = 0;  // Explicitly reset the level
+    //            activeUpgrades[upgrade.upgradeName] = runtimeCopy;
+    //            Debug.Log($"Added upgrade: {upgrade.upgradeName} to active upgrades. Current level: {runtimeCopy.currentLevel}");
+    //        }
+    //        else
+    //        {
+    //            Debug.LogWarning("Null upgrade found in availableUpgrades array!");
+    //        }
+    //    }
+
+    //    //Debug.Log($"Finished InitializeUpgrades. Total active upgrades: {activeUpgrades.Count}");
+    //}
 
     public ShopUpgrade GetUpgrade(string upgradeName)
     {
@@ -130,11 +155,23 @@ public class GM : MonoBehaviour, ShopController.IGameState
                 // log the updgrade name and current level
                 //Debug.Log("Feature upgrade: " + upgrade.upgradeName + " current level: " + activeUpgrades[upgrade.upgradeName].currentLevel);
                 break;
+
+            case UpgradeCategory.Accuracy:
+                activeUpgrades[upgrade.upgradeName].currentLevel = upgrade.currentLevel;
+                break;
+            case UpgradeCategory.Speed:
+                activeUpgrades[upgrade.upgradeName].currentLevel = upgrade.currentLevel;
+                break;
         }
 
         // Fire the upgrade applied event
         EventManager.current.ApplyUpgrade(upgrade.upgradeName, upgrade.category, activeUpgrades[upgrade.upgradeName].currentLevel);
         upgradeApplied = true;
+    }
+
+    public int GetML_Level()
+    {
+        return activeUpgrades["Learning Boost"].currentLevel;
     }
 
     public int GetFeatureLevel()    
@@ -232,12 +269,12 @@ public class GM : MonoBehaviour, ShopController.IGameState
     void Awake()
     {
         ShopUI.SetActive(false);
-        InitializeUpgrades();
+        //InitializeUpgrades();
     }
 
     void Start()
     {
-        InitializeUpgrades();
+        //InitializeUpgrades();
         EventManager.current.onDayCompleted += onDayCompleted;
         EventManager.current.onTutorialStepReady += OnTutorialStepReady;
         EventManager.current.onTutorialStepCompleted += TutorialHelper.OnTutorialStepCompleted;
@@ -299,7 +336,16 @@ public class GM : MonoBehaviour, ShopController.IGameState
         if (currentLevelIndex >= TotalLevelsCount) {
             Debug.Log("All levels completed! Loading Good Ending scene.");
             Debug.Log(TotalLevelsCount);
-            SceneManager.LoadScene("Good Ending");
+            //if normal levels then transition else ai levels so good ending
+            if (ai_levels_ongoing)
+            {
+                SceneManager.LoadScene("Good Ending");
+            }
+            else
+            {
+                SceneManager.LoadScene("Transition");
+            }
+            
         }
     }
 
@@ -587,6 +633,8 @@ public class GM : MonoBehaviour, ShopController.IGameState
 
         if (currentLevel is AILevel al)
         {
+            InitializeUpgrades(al.levelUpgrades);
+
             canShowShop = false;
             trainingTime = al.trainingTime;
             waveData = al.trainingWave; // This is an AIWave
@@ -594,6 +642,8 @@ public class GM : MonoBehaviour, ShopController.IGameState
         }
         else if (currentLevel is Level l)
         {
+            InitializeUpgrades(l.levelUpgrades);
+
             canShowShop = true;
             trainingTime = l.trainingTime;
             waveData = l.trainingWave; // This is a traditional Wave

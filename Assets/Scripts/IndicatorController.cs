@@ -12,6 +12,8 @@ public class IndicatorController : MonoBehaviour
     }
 
     public IndicatorType indicatorType;
+    //public UpgradeCategory watchedCategory;
+
     public Color[] tierColors = new Color[] { 
         new Color(0.5f, 0.5f, 0.5f, 0.5f),    // Inactive color
         new Color(1.0f, 0.5f, 0.0f, 0.5f),    // Orange
@@ -80,6 +82,7 @@ public class IndicatorController : MonoBehaviour
 
         if (isRelevantUpgrade)
         {
+            Debug.Log($"[Indicator check] The upgrade was relevant and {category}");
             UpdateIndicator(newLevel);
         }
     }
@@ -88,18 +91,26 @@ public class IndicatorController : MonoBehaviour
     {
         // Round to nearest int since we're working with discrete levels
         int level = Mathf.RoundToInt(value);
-        
+
+        if (level <= 0)
+        {
+            Debug.LogWarning($"[Indicator check] Received a level value of {level}. Ignoring update to prevent UI wipe.");
+            return;
+        }
+
         for (int i = 0; i < indicatorBubbles.Count; i++)
         {
             if (indicatorBubbles[i] != null)
             {
                 if (i < level && i < tierColors.Length - 1)
                 {
+                    Debug.Log("[Indicator check] update of the UI ok");
                     // Light up with the appropriate tier color (offset by 1 since index 0 is inactive)
                     indicatorBubbles[i].color = tierColors[i + 1];
                 }
                 else
                 {
+                    Debug.Log("[Indicator check] Use the inactive color");
                     // Not achieved yet, use inactive color
                     indicatorBubbles[i].color = inactiveColor;
                 }

@@ -9,4 +9,9 @@ public class BookController : MonoBehaviour
     {
         SceneManager.LoadScene("MainGame");
     }
+
+    public void LoadLevel2()
+    {
+        SceneManager.LoadScene("Level2");
+    }
 } 

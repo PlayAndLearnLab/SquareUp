@@ -29,4 +29,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Book-Page Curl/Example/scenes/Good Ending.unity
     guid: 3729aef71817f40e2b82afbf08235a8c
+  - enabled: 1
+    path: Assets/Scenes/Level2.unity
+    guid: cd34507d8db2f4b3f8272c8c20010614
+  - enabled: 1
+    path: Assets/Book-Page Curl/Example/scenes/Transition.unity
+    guid: 99f79f95641fd4eb5b922dc473666d45
   m_configObjects: {}

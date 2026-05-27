@@ -52,4 +52,5 @@ public enum UpgradeCategory
     Quality,   // Improvements to existing features
     Accuracy,  // Improvements to accuracy
     Speed,     // Improvements to speed
+    Learning,
 }

@@ -1276,6 +1276,7 @@ MonoBehaviour:
   - {fileID: 660130864}
   upgradePanel: {fileID: 0}
   blockerMask: {fileID: 1137403628}
+  ailevels: 0
 --- !u!1 &163001628
 GameObject:
   m_ObjectHideFlags: 0
@@ -5931,14 +5932,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b8e50cc8201d249f6affc0b9cc6048ee, type: 2}
   - {fileID: 11400000, guid: a90bf7ba1105d482f82bd896323bf2a2, type: 2}
   ailevels: []
-  availableUpgrades:
-  - {fileID: 11400000, guid: 2c67f849603dd451fb29dc918fa999a6, type: 2}
-  - {fileID: 11400000, guid: c04cc3be4f4414b169bec075a3a8bce5, type: 2}
-  - {fileID: 11400000, guid: 269c4da6a25f347cbb8c73c9d79dbbb5, type: 2}
-  - {fileID: 11400000, guid: d8aa3e4694c5449f8b57946cf593130c, type: 2}
   featureLineController: {fileID: 6155247240740501995}
   waitLineController: {fileID: 303824275}
   day: 0
+  ai_levels_ongoing: 0
 --- !u!82 &704073425
 AudioSource:
   m_ObjectHideFlags: 0
@@ -7717,6 +7714,10 @@ PrefabInstance:
     - target: {fileID: 1201595117021806192, guid: f1e8ec33d1947481dbd9ab2f18e489d0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2969872121576574755, guid: f1e8ec33d1947481dbd9ab2f18e489d0, type: 3}
+      propertyPath: category
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2969872121576574755, guid: f1e8ec33d1947481dbd9ab2f18e489d0, type: 3}
       propertyPath: purchaseSound
@@ -17603,6 +17604,10 @@ PrefabInstance:
     - target: {fileID: 1201595117021806192, guid: f1e8ec33d1947481dbd9ab2f18e489d0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2969872121576574755, guid: f1e8ec33d1947481dbd9ab2f18e489d0, type: 3}
+      propertyPath: category
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 2969872121576574755, guid: f1e8ec33d1947481dbd9ab2f18e489d0, type: 3}
       propertyPath: purchaseSound

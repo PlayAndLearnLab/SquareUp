@@ -15,3 +15,6 @@ MonoBehaviour:
   trainingTime: 60
   trainingWave: {fileID: 11400000, guid: 070e3932cb2954ef9a1aa7678584db9f, type: 2}
   testWave: {fileID: 11400000, guid: 38a2eda0ea4854168ad45b0cd027d29a, type: 2}
+  levelUpgrades:
+  - {fileID: 11400000, guid: d8aa3e4694c5449f8b57946cf593130c, type: 2}
+  - {fileID: 11400000, guid: ddb096841c00f486789bc2f864292c39, type: 2}

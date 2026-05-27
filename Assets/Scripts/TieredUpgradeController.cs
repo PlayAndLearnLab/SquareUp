@@ -8,6 +8,7 @@ using TMPro;
 public class TieredUpgradeController : MonoBehaviour
 {
     public GameObject bubbleContainer;
+    public UpgradeCategory category;
     public Color[] tierColors = new Color[] { 
         new Color(0.5f, 0.5f, 0.5f, 0.5f),    // Inactive color
         new Color(1.0f, 0.5f, 0.0f, 0.5f),    // Orange
@@ -24,7 +25,7 @@ public class TieredUpgradeController : MonoBehaviour
     private ShopUpgrade upgrade;
     private GameObject[] tierBubbles;
     private Image[] bubbleImages;
-    private int upgradeLevel = 0;
+    //private int upgradeLevel = 0;
     private const int BASE_PRICE = 10;
     
     void Start()
@@ -50,7 +51,7 @@ public class TieredUpgradeController : MonoBehaviour
         upgrade = _upgrade;
         purchaseButton.onClick.AddListener(() => {
             onPurchaseButtonClick(upgrade);
-            upgradeLevel++;
+            //upgradeLevel++;
             RefreshDisplay();
             AudioSource.PlayClipAtPoint(purchaseSound, transform.position);
         });
@@ -61,7 +62,8 @@ public class TieredUpgradeController : MonoBehaviour
     {
         if (priceText != null)
         {
-            int nextPrice = BASE_PRICE * (int)Mathf.Pow(2, upgradeLevel);
+            //int nextPrice = BASE_PRICE * (int)Mathf.Pow(2, upgradeLevel);
+            int nextPrice = upgrade != null ? upgrade.GetNextLevelCost : BASE_PRICE;
             priceText.text = nextPrice.ToString();
         }
     }
@@ -85,7 +87,8 @@ public class TieredUpgradeController : MonoBehaviour
             // Change color based on level
             if (bubbleImages[i] != null)
             {
-                if (i < upgradeLevel && i < tierColors.Length - 1)
+                //if (i < upgradeLevel && i < tierColors.Length - 1)
+                if (i < upgrade.currentLevel && i < tierColors.Length - 1)
                 {
                     // Light up with the color at the same index
                     bubbleImages[i].color = tierColors[i + 1]; // +1 because index 0 is inactive color

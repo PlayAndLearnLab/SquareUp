@@ -228,6 +228,12 @@ public class AICustomerActions : MonoBehaviour
 
         Debug.Log($"[Action-Step 1] {gameObject.name} entering Order Line.");
 
+        //if (TutorialHelper.IsInTutorial)
+        //{
+        //    Debug.Log("Pause timer");
+        //    EventManager.current.PauseTimer();
+        //}
+
         // 1. JOIN THE ORDER LINE — enqueue and wait inline (avoids cross-MonoBehaviour coroutine yield)
         featureLineController.EnqueueCustomer(SPEED, movController);
         float lineWaitStart = Time.time;
@@ -284,12 +290,12 @@ public class AICustomerActions : MonoBehaviour
 
         controller.ShowSpeechBubble(SpeechBubbleController.BubbleIcon.InactiveSpeaker);
 
-        int bubbleWaitTime = (int)(10 * waitTimeMultiplier);
+        //int bubbleWaitTime = (int)(10 * waitTimeMultiplier);
+        int bubbleWaitTime = TutorialHelper.IsInTutorial ? 999999 : (int)(10 * waitTimeMultiplier);
         bool clicked = false;
 
         if (TutorialHelper.IsInTutorial)
         {
-            // This tells TutorialHelper to show the "Click the bubble" UI
             StartCoroutine(TutorialHelper.ShowTutorialStepUntil(1, () => clicked || isDestroyed));
         }
 
@@ -342,7 +348,10 @@ public class AICustomerActions : MonoBehaviour
 
     private IEnumerator WaitForCoffeeApproval()
     {
-        int maxWaitTime = (int)(30 * waitTimeMultiplier);
+        //int maxWaitTime = (int)(30 * waitTimeMultiplier);
+        //controller.SetTimeFloor(maxWaitTime);
+
+        int maxWaitTime = TutorialHelper.IsInTutorial ? 999999 : (int)(30 * waitTimeMultiplier);
         controller.SetTimeFloor(maxWaitTime);
 
         yield return controller.WaitForConditionWithIcon(SpeechBubbleController.BubbleIcon.Timer, maxWaitTime, () => {

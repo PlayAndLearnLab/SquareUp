@@ -572,6 +572,23 @@ public class CoffeeDistributorController : MonoBehaviour
             Debug.Log($"Accuracy upgrade applied! New Accuracy: {CurrentAccuracy}.");
             changed = true;
         }
+        else if (category == UpgradeCategory.Learning)
+        {
+            float boostAmount = 0.3f;
+
+            CoffeeBrain brain = FindObjectOfType<CoffeeBrain>();
+            if (brain != null)
+            {
+                brain.ApplyLearningBoost(boostAmount);
+
+            }
+            else
+            {
+                Debug.LogWarning("Upgrade applied but CoffeeBrain instance was not found in the scene");
+            }
+
+
+        }
 
         // Fire event if Speed or Accuracy changed
         if (changed && EventManager.current != null)

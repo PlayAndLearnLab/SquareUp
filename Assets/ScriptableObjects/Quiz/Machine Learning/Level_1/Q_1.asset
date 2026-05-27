@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46e4e4e1eba2d423bb36718521bc37fa, type: 3}
+  m_Name: Q_1
+  m_EditorClassIdentifier: 
+  question: "A customer says, \u201CCan I get something cold and sweet?\u201D Why
+    might the AI still make the wrong prediction?"
+  answers:
+  - Because cold drinks cannot be predicted by AI.
+  - Because sweet drinks are removed from the menu.
+  - Because the coffee machine is disconnected.
+  - Because the sentence could match several drinks.
+  answerExplanation: "Words like \u201Ccold\u201D and \u201Csweet\u201D can describe
+    many different drinks, so the AI must choose the most likely one."
+  correctAnswer: 3

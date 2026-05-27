@@ -424,9 +424,10 @@ public class CustomerActions : MonoBehaviour
         // For level 0, need to be clicked first
         bool clicked = false;
         //tutorialCoroutine = StartCoroutine(TutorialHelper.ShowTutorialStepUntil(1, () => clicked || isDestroyed));
-        
+        int baseOrderWaitTime = 30;
+
         // Character waits to be clicked
-        yield return controller.WaitForClickWithIcon(SpeechBubbleController.BubbleIcon.InactiveSpeaker, (int)(10 * waitTimeMultiplier), (bool wasClicked) =>
+        yield return controller.WaitForClickWithIcon(SpeechBubbleController.BubbleIcon.InactiveSpeaker, (int)(baseOrderWaitTime * waitTimeMultiplier), (bool wasClicked) =>
         {
             clicked = wasClicked;
         });

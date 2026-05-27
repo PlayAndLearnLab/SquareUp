@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2c935c8921ef4d59b96570febeffd88, type: 3}
+  m_Name: MachineLearning
+  m_EditorClassIdentifier: 
+  quizName: Machine Learning
+  score: 0
+  currentQuestion: 0
+  passMark: 4
+  questions:
+  - {fileID: 11400000, guid: 510aada5d6dba45108440026606cb365, type: 2}
+  - {fileID: 11400000, guid: 9b1da3ee0d44d478684350c375d2f40b, type: 2}
+  - {fileID: 11400000, guid: f5c213989ebbf4cd1abde0795f2a05c7, type: 2}
+  - {fileID: 11400000, guid: c5262e803fd874f2bbbd98cfadc26e37, type: 2}
+  learningVideoLink: 
+  introSlides: {fileID: 11400000, guid: c45a6ed11c5ca4e12ab75e700f01caf3, type: 2}

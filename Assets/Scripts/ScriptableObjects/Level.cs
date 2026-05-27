@@ -6,4 +6,5 @@ public class Level : ScriptableObject
     public int trainingTime;
     public Wave trainingWave;
     public Wave testWave;
+    public ShopUpgrade[] levelUpgrades;
 }

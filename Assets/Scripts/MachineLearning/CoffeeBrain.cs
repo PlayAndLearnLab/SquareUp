@@ -56,7 +56,7 @@ public class CoffeeBrain : MonoBehaviour
     private bool isProcessingAI = false;
 
     [Header("Analytics")]
-    public BrainAnalytics analytics;
+    public NewBrainAnalytics analytics;
 
     [Header("Daily Performance Tracking")]
     public int dailySuccesses = 0;
@@ -282,16 +282,6 @@ public class CoffeeBrain : MonoBehaviour
                 flavorScore += (data.suggestedProfile * w);
                 //totalWeightFound += data.weight;
 
-                //// Caffeine logic (Simple binary check)
-                //if (data.suggestedCaffeine > 0) caffeineScore += data.weight;
-                //else caffeineScore -= data.weight;
-
-                //// Temperature logic
-                //float tempInfluence = Mathf.Lerp(data.weight, -data.weight, data.suggestedTemp);
-                //tempScore += tempInfluence;
-
-                //// Profile logic (Sweet vs Earthy)
-                //flavorScore += (data.suggestedProfile == 1) ? data.weight : -data.weight;
             }
         }
 
@@ -306,25 +296,12 @@ public class CoffeeBrain : MonoBehaviour
         if (profile.favoriteTemp == TempPreference.Hot) tempScore -= 0.1f; // Nudge toward 0
         else tempScore += 0.1f; // Nudge toward 1
 
-        //// Bias & Confidence
-        //if (profile.favoriteTemp == TempPreference.Hot) tempScore += 0.75f;
-        //else tempScore -= 0.75f;
 
         float masteryThreshold = 5.0f;
         float certaintyThreshold = 2.0f;
         float baseConfidence = Mathf.Clamp01(totalWeightFound / masteryThreshold);
-        //float tempCertainty = totalWeightFound > 0 ? Mathf.Abs(tempScore) / totalWeightFound : 0;
         float tempCertainty = Mathf.Clamp01(Mathf.Abs(tempScore) / certaintyThreshold);
-        //float finalConfidence = Mathf.Clamp(tempCertainty + profile.aiConfidence, 0f, 1f);
         float finalConfidence = Mathf.Clamp(baseConfidence + (profile.aiConfidence * 0.2f), 0.05f, 1f);
-
-        //bool wantsCaffeine = caffeineScore >= 0;
-        //bool isHot = tempScore >= 0;
-        //bool isSweet = flavorScore >= 0;
-
-        //bool wantsCaffeine = caffeineScore > 0;
-        //bool isHot = tempScore < (totalWeightFound * 0.5f);
-        //bool isSweet = flavorScore > (totalWeightFound * 0.5f);
 
         bool wantsCaffeine = caffeineScore >= 0; // Above 0 is caffeine
         bool isHot = tempScore <= 0.5f;          // Below 0.5 is Hot
@@ -536,7 +513,49 @@ public class CoffeeBrain : MonoBehaviour
         SaveLearnedWeights();
     }
 
-    
+    /// <summary>
+    /// Nudges the player's currently active brain parameters closer to the perfect JSON values.
+    /// </summary>
+    /// <param name="boostPercentage">The percentage closer to perfect (e.g., 0.3f for 30%)</param>
+    public void ApplyLearningBoost(float boostPercentage)
+    {
+        string path = Path.Combine(Application.streamingAssetsPath, "Ideal_BrainData.json");
+
+        if (!File.Exists(path))
+        {
+            Debug.LogError("Learning Boost failed: BrainData.json master file not found!");
+            return;
+        }
+
+        // Load the clean, ideal configuration you just saved
+        string json = File.ReadAllText(path);
+        BrainWrapper masterWrapper = JsonUtility.FromJson<BrainWrapper>(json);
+        List<KeywordData> idealDatabase = masterWrapper.keywords;
+
+        // Loop through your live runtime database and nudge them toward the ideal baseline
+        foreach (var liveData in brainDatabase)
+        {
+            // Find the matching keyword from the ideal dataset
+            KeywordData idealData = idealDatabase.Find(x => x.keyword.Equals(liveData.keyword, StringComparison.OrdinalIgnoreCase));
+
+            if (idealData != null)
+            {
+                // 1. Pull the prediction metrics closer to ideal targets
+                liveData.suggestedCaffeine = Mathf.Lerp(liveData.suggestedCaffeine, idealData.suggestedCaffeine, boostPercentage);
+                liveData.suggestedTemp = Mathf.Lerp(liveData.suggestedTemp, idealData.suggestedTemp, boostPercentage);
+                liveData.suggestedProfile = Mathf.Lerp(liveData.suggestedProfile, idealData.suggestedProfile, boostPercentage);
+
+                // 2. Safely boost the confidence weight closer to the master baseline setting
+                liveData.weight = Mathf.Lerp(liveData.weight, idealData.weight, boostPercentage);
+            }
+        }
+
+        // Save these newly upgraded parameters to PlayerPrefs so they persist
+        SaveLearnedWeights();
+        Debug.Log($"<color=#50C878><b>[AI LEARNING BOOST]</b> Model parameters shifted {boostPercentage * 100}% closer to the ideal configuration!</color>");
+    }
+
+
 
     private float GetFlavorProfileValue(CoffeeFlavor flavor)
     {
