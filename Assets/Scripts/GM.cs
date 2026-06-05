@@ -45,17 +45,79 @@ public class GM : MonoBehaviour, ShopController.IGameState
     // Upgrade system
 
     private bool nextDayClicked = false;  // Add this field at the top with other private fields
+    private bool isIntroStep0Complete = false;
 
     #region Upgrade System Methods
     private Dictionary<string, ShopUpgrade> activeUpgrades = new Dictionary<string, ShopUpgrade>();
     public bool IsAILevel => (ailevels != null && currentLevelIndex < ailevels.Length);
 
-    private void InitializeUpgrades(ShopUpgrade[] upgradesToLoad)
+    public void InitializeUpgrades(ShopUpgrade[] availableUpgrades)
+    {
+        if (activeUpgrades == null)
+        {
+            Debug.Log("[GM Lifecycle] activeUpgrades dictionary was NULL. Creating fresh tracking collection.");
+            activeUpgrades = new Dictionary<string, ShopUpgrade>();
+        }
+        else
+        {
+            Debug.Log($"[GM Lifecycle] activeUpgrades persistent dictionary exists! Count: {activeUpgrades.Count} items.");
+            foreach (var kvp in activeUpgrades)
+            {
+                Debug.Log($"[GM Lifecycle Memory Dump] Key tracked in RAM: '{kvp.Key}' | Level: {kvp.Value.currentLevel}");
+            }
+        }
+
+        //string[] coreKeys = { "Accuracy", "Speed", "Speech-to-Text", "Quality Check" };
+
+        foreach (var upgradeTemplate in availableUpgrades)
+        {
+            // Guard against clean string comparisons (strip spaces, enforce formatting matches)
+            string trackingKey = upgradeTemplate.upgradeName.Trim();
+
+            if (!activeUpgrades.ContainsKey(trackingKey))
+            {
+                // First time loading this upgrade into memory context
+                ShopUpgrade runtimeCopy = upgradeTemplate.CreateRuntimeCopy();
+                activeUpgrades[trackingKey] = runtimeCopy;
+                Debug.Log($"[GM Lifecycle] Loaded fresh runtime instance for category '{runtimeCopy.category}': Key='{trackingKey}' initialized at level: {runtimeCopy.currentLevel}");
+            }
+            else
+            {
+                // Crucial block: State already exists! 
+                // We DO NOT overwrite the instance entirely, but we print out what it currently is.
+                Debug.Log($"[GM Lifecycle SUCCESS] Preserved existing state for upgrade key '{trackingKey}'. Active game runtime level remains: {activeUpgrades[trackingKey].currentLevel}");
+            }
+        }
+
+        //string[] coreKeys = { "Accuracy", "Speed", "Speech-to-Text", "Quality Check" };
+
+        //foreach (string coreKey in coreKeys)
+        //{
+        //    if (!activeUpgrades.ContainsKey(coreKey))
+        //    {
+        //        // If a level configuration forgot to include it, create a mock or empty entry 
+        //        // so components like QualityCameraController don't crash the game thread.
+        //        ShopUpgrade fallbackUpgrade = ScriptableObject.CreateInstance<ShopUpgrade>();
+        //        fallbackUpgrade.upgradeName = coreKey;
+        //        fallbackUpgrade.currentLevel = 0; // Default locked state
+
+        //        activeUpgrades[coreKey] = fallbackUpgrade;
+        //        Debug.LogWarning($"[GM Initializer] Core key '{coreKey}' was completely missing from scene layout setup! Created fallback level-0 entry.");
+        //    }
+        //}
+    }
+
+    private void old_InitializeUpgrades(ShopUpgrade[] upgradesToLoad)
     {
         if (upgradesToLoad == null || upgradesToLoad.Length == 0)
             return;
 
-        activeUpgrades.Clear();
+        if (activeUpgrades == null)
+        {
+            activeUpgrades = new Dictionary<string, ShopUpgrade>();
+        }
+
+        //activeUpgrades.Clear();
 
         foreach (var upgrade in upgradesToLoad)
         {
@@ -108,6 +170,29 @@ public class GM : MonoBehaviour, ShopController.IGameState
     //    //Debug.Log($"Finished InitializeUpgrades. Total active upgrades: {activeUpgrades.Count}");
     //}
 
+    // Inside GM.cs
+    public void PurchaseUpgrade(string upgradeKey)
+    {
+        if (activeUpgrades != null && activeUpgrades.ContainsKey(upgradeKey))
+        {
+            ShopUpgrade runtimeUpgrade = activeUpgrades[upgradeKey];
+
+            if (!runtimeUpgrade.IsMaxLevel)
+            {
+                runtimeUpgrade.currentLevel++;
+                Debug.Log($"[GM] Successfully upgraded {upgradeKey} to level {runtimeUpgrade.currentLevel}!");
+            }
+            else
+            {
+                Debug.LogWarning($"[GM] {upgradeKey} is already at max level!");
+            }
+        }
+        else
+        {
+            Debug.LogError($"[GM] Cannot upgrade! Key '{upgradeKey}' not found in activeUpgrades dictionary.");
+        }
+    }
+
     public ShopUpgrade GetUpgrade(string upgradeName)
     {
         return activeUpgrades.ContainsKey(upgradeName) ? activeUpgrades[upgradeName] : null;
@@ -121,6 +206,55 @@ public class GM : MonoBehaviour, ShopController.IGameState
     private bool upgradeApplied = false;
 
     public void ApplyUpgrade(ShopUpgrade upgrade)
+    {
+        // FIX 1: Adjust bounds checking to handle features cleanly, 
+        // or log explicitly so it never fails silently again if configurations are empty
+        if (upgrade.currentLevel <= 0)
+        {
+            Debug.LogError($"[GM] '{upgrade.upgradeName}' has an invalid level of {upgrade.currentLevel}. Aborting.");
+            return;
+        }
+
+        // Safely check valuePerLevel bounds only if values are populated
+        float currentValue = 0f;
+        if (upgrade.valuePerLevel != null && upgrade.currentLevel <= upgrade.valuePerLevel.Length)
+        {
+            currentValue = upgrade.valuePerLevel[upgrade.currentLevel - 1];
+        }
+        else
+        {
+            Debug.LogWarning($"[GM] '{upgrade.upgradeName}' level {upgrade.currentLevel} doesn't have a corresponding value in valuePerLevel array. Proceeding with state sync anyway.");
+        }
+
+        // Safety check: verify key exists in the active state dictionary before modifying it
+        if (!activeUpgrades.ContainsKey(upgrade.upgradeName))
+        {
+            Debug.LogError($"[GM] Key '{upgrade.upgradeName}' was not initialized in activeUpgrades dictionary!");
+            return;
+        }
+
+        // FIX 2: Explicitly assign the level value directly for ALL categories.
+        // Doing activeUpgrades[...].currentLevel++ here double-increments it 
+        // because ShopController already added +1 to the source object reference!
+        switch (upgrade.category)
+        {
+            case UpgradeCategory.Quality:
+            case UpgradeCategory.Feature:
+            case UpgradeCategory.Accuracy:
+            case UpgradeCategory.Speed:
+            case UpgradeCategory.Learning:
+                activeUpgrades[upgrade.upgradeName].currentLevel = upgrade.currentLevel;
+                break;
+        }
+
+        Debug.Log($"[GM Success] '{upgrade.upgradeName}' synced to master dictionary. Level is now: {activeUpgrades[upgrade.upgradeName].currentLevel}");
+
+        // Fire the upgrade applied event
+        EventManager.current.ApplyUpgrade(upgrade.upgradeName, upgrade.category, activeUpgrades[upgrade.upgradeName].currentLevel);
+        upgradeApplied = true;
+    }
+
+    public void old_ApplyUpgrade(ShopUpgrade upgrade)
     {
         // Safety check: Ensure currentLevel is within the bounds of valuePerLevel
         if (upgrade.currentLevel <= 0 || upgrade.currentLevel > upgrade.valuePerLevel.Length)
@@ -174,11 +308,43 @@ public class GM : MonoBehaviour, ShopController.IGameState
         return activeUpgrades["Learning Boost"].currentLevel;
     }
 
-    public int GetFeatureLevel()    
+    public int old_GetFeatureLevel()    
     {
         return activeUpgrades["Speech-to-Text"].currentLevel;
     }
-    public int GetQualityLevel()    
+
+    public int GetFeatureLevel()
+    {
+        // 1. Safety check: make sure the dictionary exists and contains the requested key
+        if (activeUpgrades != null && activeUpgrades.ContainsKey("Speech-to-Text"))
+        {
+            return activeUpgrades["Speech-to-Text"].currentLevel;
+        }
+
+        // 2. Safe fallback: log a warning in the editor instead of crashing the game
+        Debug.LogWarning($"[GM] Feature key '{"Speech-to-Text"}' not found in activeUpgrades dictionary! Defaulting to level 0.");
+        return 0;
+    }
+
+    public int GetQualityLevel()
+    {
+        if (activeUpgrades == null)
+        {
+            Debug.LogWarning("[GM] activeUpgrades dictionary is null when checking Quality Level! Defaulting to 0.");
+            return 0;
+        }
+
+        // FIX: Check if the key exists before indexing into it
+        if (activeUpgrades.ContainsKey("Quality Check"))
+        {
+            return activeUpgrades["Quality Check"].currentLevel;
+        }
+
+        // Fallback if the level configurations didn't load the asset or if it's not initialized yet
+        Debug.LogWarning("[GM] 'Quality Check' key was missing from activeUpgrades. Returning default level 0.");
+        return 0;
+    }
+    public int old_GetQualityLevel()    
     {
         //Debug.Log("Qual level" + activeUpgrades["Quality Check"].currentLevel);
         return activeUpgrades["Quality Check"].currentLevel;
@@ -208,6 +374,12 @@ public class GM : MonoBehaviour, ShopController.IGameState
             //Debug.LogWarning($"Could not walk customer to exit: {e.Message}");
             return false;
         }
+    }
+
+    public void CompleteIntroStep()
+    {
+        Debug.Log("[GM] Intro Step 0 Custom Release Triggered!");
+        isIntroStep0Complete = true;
     }
 
     private IEnumerator RemoveCustomer(GameObject customer)
@@ -270,6 +442,18 @@ public class GM : MonoBehaviour, ShopController.IGameState
     {
         ShopUI.SetActive(false);
         //InitializeUpgrades();
+
+        if (ai_levels_ongoing)
+        {
+            currentLevelIndex = 0;
+            TutorialHelper.Reset();
+            Debug.Log("[GM] AI Scene detected. Resetting currentLevelIndex to 0.");
+            if (activeUpgrades != null)
+            {
+                activeUpgrades.Clear();
+                Debug.Log("[GM Clean Lifecycle] Flushed persistent upgrades cache for AI isolation.");
+            }
+        }
     }
 
     void Start()
@@ -323,17 +507,27 @@ public class GM : MonoBehaviour, ShopController.IGameState
 
     IEnumerator GameLoop()
     {
+        Debug.Log($"[GM GAMELOOP] Starting GameLoop. currentLevelIndex={currentLevelIndex}, inDay={inDay}, ai_levels_ongoing={ai_levels_ongoing}");
         yield return StartLevel(currentLevelIndex++);
+        Debug.Log($"[GM GAMELOOP] StartLevel finished. Waiting for canShowShop. currentLevelIndex now={currentLevelIndex}");
         yield return new WaitUntil(() => canShowShop);
+        Debug.Log("[GM GAMELOOP] canShowShop is true. Showing shop.");
         yield return ShowShop();
+        Debug.Log("[GM GAMELOOP] Shop closed. shopClosed=true");
         shopClosed = true;
         if (TutorialHelper.IsInTutorial) {
             Debug.Log("Ending Tutorial");
             TutorialHelper.EndTutorial();
         }
-        
+
+        //TO REMOVE WHEN TESTING DONE
+        //if (!ai_levels_ongoing && currentLevelIndex == 3)
+        //{
+        //    SceneManager.LoadScene("Transition");
+        //}
+
         // Check if all levels are completed
-        if (currentLevelIndex >= TotalLevelsCount) {
+        if (currentLevelIndex >= TotalLevelsCount || Input.GetKeyDown(KeyCode.A)) {
             Debug.Log("All levels completed! Loading Good Ending scene.");
             Debug.Log(TotalLevelsCount);
             //if normal levels then transition else ai levels so good ending
@@ -426,6 +620,8 @@ public class GM : MonoBehaviour, ShopController.IGameState
 
     void OnTutorialStepReady(int step)
     {
+        Debug.Log($"[GM OnTutorialStepReady] Called with step={step}, ai_levels_ongoing={ai_levels_ongoing}");
+
         if (ai_levels_ongoing == false)
         {
             //Debug.Log("Tutorial step ready: " + step);
@@ -513,10 +709,23 @@ public class GM : MonoBehaviour, ShopController.IGameState
             //        return false;
             //    }));
             //}
+            if (step == 0)
+            {
+                //var confirmBtn = GameObject.Find("Confirmation Button")?.GetComponent<UnityEngine.UI.Button>();
+                Debug.Log($"[GM TUTORIAL] Step 0");
+
+                //if (confirmBtn != null)
+                //{
+                //    confirmBtn.onClick.AddListener(CompleteIntroStep);
+                //}
+            }
 
             if (step == 1)
             {
                 //SpawnCustomer(ailevels[currentLevelIndex].trainingWave.customers[0], true);
+                //Debug.Log("Step 1 in motion without any OnTutorialStepReady Coroutine");
+                Debug.Log("[GM] Step 1 ready → marking isIntroStep0Complete = true");
+                isIntroStep0Complete = true; // ← ADD THIS
                 Debug.Log("Step 1 in motion without any OnTutorialStepReady Coroutine");
             }
             else if (step == 2)
@@ -618,43 +827,100 @@ public class GM : MonoBehaviour, ShopController.IGameState
 
     private object GetCurrentLevelObject(int index)
     {
-        if (ailevels != null && ailevels.Length > index) return ailevels[index];
+        //if (ailevels != null && ailevels.Length > index) return ailevels[index];
+        if (ai_levels_ongoing)
+        {
+            // Prevent index out of bounds if scenes transition with high indices
+            int safeAIIndex = index % ailevels.Length;
+            if (ailevels != null && ailevels.Length > safeAIIndex) return ailevels[safeAIIndex];
+        }
         if (levels != null && levels.Length > index) return levels[index];
         return null;
     }
 
     IEnumerator StartLevel(int levelIndex)
     {
-        yield return TutorialHelper.WaitForTutorialStep(0);
+        Debug.Log($"[GM STARTLEVEL] Entered. levelIndex={levelIndex}, inDay={inDay}, isIntroStep0Complete={isIntroStep0Complete}");
+
+        if (ai_levels_ongoing)
+        {
+            // Instead of waiting on the shared TutorialHelper, wait for our local flag
+            yield return new WaitUntil(() => isIntroStep0Complete);
+        }
+        else
+        {
+            // Traditional levels can keep their old behavior
+            yield return TutorialHelper.WaitForTutorialStep(0);
+        }
+
+        inDay = true;
+        Debug.Log($"[GM STARTLEVEL] After inDay reset: inDay={inDay}");
+
+
+        Debug.Log("[GM PROGRESSION] Breaking free from Step 0 window! Initializing wave configurations.");
+
+        //yield return TutorialHelper.WaitForTutorialStep(0);
 
         object currentLevel = GetCurrentLevelObject(levelIndex);
         int trainingTime = 0;
         object waveData = null;
 
-        if (currentLevel is AILevel al)
+        try
         {
-            InitializeUpgrades(al.levelUpgrades);
-
-            canShowShop = false;
-            trainingTime = al.trainingTime;
-            waveData = al.trainingWave; // This is an AIWave
-            currentWaveTargetCount = al.trainingWave.customers.Length;
+            if (currentLevel is AILevel al)
+            {
+                InitializeUpgrades(al.levelUpgrades);
+                canShowShop = false;
+                trainingTime = al.trainingTime;
+                waveData = al.trainingWave;
+                currentWaveTargetCount = al.trainingWave.customers.Length;
+            }
+            else if (currentLevel is Level l)
+            {
+                InitializeUpgrades(l.levelUpgrades);
+                canShowShop = true;
+                trainingTime = l.trainingTime;
+                waveData = l.trainingWave;
+                currentWaveTargetCount = l.trainingWave.customers.Length;
+            }
         }
-        else if (currentLevel is Level l)
+        catch (System.Exception ex)
         {
-            InitializeUpgrades(l.levelUpgrades);
-
-            canShowShop = true;
-            trainingTime = l.trainingTime;
-            waveData = l.trainingWave; // This is a traditional Wave
-            currentWaveTargetCount = l.trainingWave.customers.Length;
+            Debug.LogError($"[CRITICAL GM SETUP EXCEPTION] Stalled setup phase: {ex.Message}\n{ex.StackTrace}");
         }
+
+        //if (currentLevel is AILevel al)
+        //{
+        //    InitializeUpgrades(al.levelUpgrades);
+
+        //    canShowShop = false;
+        //    trainingTime = al.trainingTime;
+        //    waveData = al.trainingWave; // This is an AIWave
+        //    currentWaveTargetCount = al.trainingWave.customers.Length;
+        //}
+        //else if (currentLevel is Level l)
+        //{
+        //    InitializeUpgrades(l.levelUpgrades);
+
+        //    canShowShop = true;
+        //    trainingTime = l.trainingTime;
+        //    waveData = l.trainingWave; // This is a traditional Wave
+        //    currentWaveTargetCount = l.trainingWave.customers.Length;
+        //}
 
         EventManager.current.DayStarted(trainingTime);
 
+        Debug.Log($"[GM] Reached Spawning Milestone. Wave Data valid? {waveData != null}");
+
+        Debug.Log($"[GM STARTLEVEL] Calling StartWave. waveData={waveData?.GetType().Name ?? "NULL"}, inDay={inDay}");
+
         StartCoroutine(StartWave(waveData, false));
+
+        Debug.Log("[GM STARTLEVEL] Now waiting for !inDay...");
+
         yield return new WaitUntil(() => !inDay);
 
+        Debug.Log("[GM STARTLEVEL] !inDay resolved. Level done.");
 
     }
 
@@ -698,6 +964,9 @@ public class GM : MonoBehaviour, ShopController.IGameState
 
     IEnumerator StartWave(object waveData, bool isTesting = false)
     {
+        //Debug.Log("Start wave initialized");
+        Debug.Log($"[GM STARTWAVE] Entered. inDay={inDay}, waveData type={waveData?.GetType().Name ?? "NULL"}");
+
         IEnumerable customers = null;
         float timeBetween = 0;
 
@@ -712,15 +981,28 @@ public class GM : MonoBehaviour, ShopController.IGameState
             timeBetween = w.timeBetweenCustomers;
         }
 
-        if (customers == null) yield break;
+        if (customers == null)
+        {
+            Debug.LogError($"[GM BUG] StartWave was passed invalid or null waveData! waveData type: {waveData?.GetType().Name ?? "NULL"}");
+            yield break;
+        }
+
+        int spawnCount = 0;
 
         foreach (object customer in customers)
         {
-            if (!inDay) break;
+            Debug.Log($"[GM STARTWAVE] Loop iteration. inDay={inDay}, spawnCount={spawnCount}");
+
+            //if (!inDay) break;
+            if (!inDay) { Debug.Log("[GM STARTWAVE] inDay is FALSE — breaking out of spawn loop!"); break; }
+
 
             SpawnCustomer(customer, isTesting);
+            spawnCount++;
             yield return new WaitForSeconds(timeBetween);
         }
+
+        Debug.Log($"[GM STARTWAVE] Finished. Total spawned: {spawnCount}");
     }
 
     void SpawnCustomer(object customerData, bool isTesting = false)
@@ -756,10 +1038,13 @@ public class GM : MonoBehaviour, ShopController.IGameState
 
             Debug.Log($"AICustomerActions count on {customerObject.name}: " + customerObject.GetComponents<AICustomerActions>().Length);
 
+            
+
             aiActions.featureLineController = this.featureLineController;
             aiActions.waitLineController = this.waitLineController;
             aiActions.exit = this.customerExit;
-            aiActions.InitializeCustomer(aiData);
+
+            aiActions.InitializeCustomer(aiData, this.customerEntrance);
             StartCoroutine(aiActions.StartTrainingActions());
             activeCustomers.Add(customerObject);
             //AICustomerActions aiActions = customerObject.AddComponent<AICustomerActions>();

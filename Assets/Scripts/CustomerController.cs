@@ -219,6 +219,11 @@ public class CustomerController : MovementController
     {
         if (gameObject == null) return;
 
+        if (pathVector.sqrMagnitude < 0.001f)
+        {
+            return;
+        }
+
         Vector3 direction = pathVector.normalized;
         gameObject.transform.localScale = new Vector3(direction.x / Mathf.Abs(direction.x), 1, 1);
     }

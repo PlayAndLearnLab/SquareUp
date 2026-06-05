@@ -123,7 +123,10 @@ public class SpeechBubbleController : MonoBehaviour
     public void ShowSpeechBubble(BubbleIcon icon)
     {
         gameObject.SetActive(true);
-        progressBarController.HideProgressBar();
+        if (progressBarController != null)
+        {
+            progressBarController.HideProgressBar();
+        }
         ShowIcon(icon);
     }
 
@@ -142,7 +145,10 @@ public class SpeechBubbleController : MonoBehaviour
         ShowSpeechBubble(icon);
         progressBarController.StartProgressBar(waitTime);
         yield return new WaitUntil(() => clicked || timer >= waitTime);
-        progressBarController.HideProgressBar();
+        if (progressBarController != null)
+        {
+            progressBarController.HideProgressBar();
+        }
         clickedCallback(clicked);
     }
 
@@ -153,7 +159,10 @@ public class SpeechBubbleController : MonoBehaviour
         ShowSpeechBubble(icon);
         progressBarController.StartProgressBar(waitTime);
         yield return new WaitUntil(() => predicate() || timer >= waitTime);
-        progressBarController.HideProgressBar();
+        if (progressBarController != null)
+        {
+            progressBarController.HideProgressBar();
+        }
         waitingForCondition = false;
     }
 
@@ -169,7 +178,10 @@ public class SpeechBubbleController : MonoBehaviour
         ShowSpeechBubbleWithSprite(sprite);
         progressBarController.StartProgressBar(waitTime);
         yield return new WaitUntil(() => predicate() || timer >= waitTime);
-        progressBarController.HideProgressBar();
+        if (progressBarController != null)
+        {
+            progressBarController.HideProgressBar();
+        }
         waitingForCondition = false;
         HideSpeechBubble();
     }

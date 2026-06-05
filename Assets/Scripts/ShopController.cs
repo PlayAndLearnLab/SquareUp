@@ -207,6 +207,35 @@ public class ShopController : MonoBehaviour
         int cost = upgrade.GetNextLevelCost;
         if (gameState.RemoveMoney(cost))
         {
+            // 1. Increment the local Shop UI copy so the shop screen displays properly
+            upgrade.currentLevel++;
+
+            UpdateMoneyDisplay();
+            RefreshUpgradeButtons();
+
+            // 2. Tell the Game Manager to register this upgrade
+            gameState.ApplyUpgrade(upgrade);
+
+            // 3. CRITICAL SYNC FIX: Ensure the GM's primary dictionary matches 
+            // the newly upgraded level if your ApplyUpgrade wasn't doing it automatically.
+            if (gm != null)
+            {
+                // If you have a specific method in your GM to set or pull levels, use it here.
+                // For example, if you can access its dictionary or update it directly:
+                // gm.PurchaseUpgrade(upgrade.upgradeName); 
+
+                // Alternatively, print a quick debug check here to see if GM is receiving it:
+                Debug.Log($"[Shop UI] Applied upgrade to GM. GM Feature Level is now: {gm.GetFeatureLevel()}");
+            }
+        }
+    }
+
+    private void old_PurchaseUpgrade(ShopUpgrade upgrade)
+    {
+        Debug.Log($"Purchasing upgrade {upgrade.name}");
+        int cost = upgrade.GetNextLevelCost;
+        if (gameState.RemoveMoney(cost))
+        {
             upgrade.currentLevel++;
             UpdateMoneyDisplay();
             RefreshUpgradeButtons();

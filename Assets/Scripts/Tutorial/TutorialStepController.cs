@@ -87,6 +87,10 @@ public class TutorialStepController : MonoBehaviour, IPointerClickHandler
         canvasGroup = GetComponent<CanvasGroup>();
         if (canvasGroup == null)
         {
+            canvasGroup = GetComponent<CanvasGroup>();
+        }
+        if (canvasGroup == null)
+        {
             //Debug.Log($"[TutorialStep {step}] Adding CanvasGroup component");
             canvasGroup = gameObject.AddComponent<CanvasGroup>();
         }
@@ -101,6 +105,19 @@ public class TutorialStepController : MonoBehaviour, IPointerClickHandler
         else 
         {
             Debug.LogError($"[TutorialStep {step}] ERROR: No RectTransform component found");
+        }
+
+        RectTransform rect = GetComponent<RectTransform>();
+        if (rect != null)
+        {
+            // If WebGL accidentally squashes the container size properties to zero
+            if (rect.rect.width == 0 && rect.rect.height == 0)
+            {
+                // Force a standard default resolution sizing configuration 
+                // so it registers properly on the canvas rendering system
+                rect.sizeDelta = new Vector2(1920f, 1080f);
+                Debug.Log("[WebGL Sizer Fix] Overrode unassigned 0x0 RectTransform bounds.");
+            }
         }
 
         if (button != null)
@@ -141,6 +158,22 @@ public class TutorialStepController : MonoBehaviour, IPointerClickHandler
         
         // Validate UI state immediately
         // ValidateUIState("Awake");
+    }
+
+    private void EnsureCanvasGroupExists()
+    {
+        if (canvasGroup == null)
+        {
+            canvasGroup = GetComponent<CanvasGroup>();
+        }
+
+        // WEBGL FALLBACK: If it's missing on the prefab, dynamically inject it 
+        // right now so the rest of the game logic doesn't crash or halt!
+        if (canvasGroup == null)
+        {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+            Debug.Log($"[WebGL Fix] Dynamically injected missing CanvasGroup on {gameObject.name}");
+        }
     }
 
     public void Start()
@@ -191,6 +224,14 @@ public class TutorialStepController : MonoBehaviour, IPointerClickHandler
 
     private void ApplyHiddenState()
     {
+
+        EnsureCanvasGroupExists();
+
+        if (canvasGroup == null)
+        {
+            canvasGroup = GetComponent<CanvasGroup>();
+        }
+
         //Debug.Log($"[TutorialStep {step}] ApplyHiddenState - GameObject Active: {gameObject.activeSelf}");
         if (canvasGroup != null)
         {
@@ -304,80 +345,108 @@ public class TutorialStepController : MonoBehaviour, IPointerClickHandler
         // Validate UI state after change
         // ValidateUIState("AfterShow");
     }
-    
+
     private IEnumerator ApplyVisibilityChanges(bool shouldShow)
     {
-         //Debug.Log($"[TutorialStep {step}] ApplyVisibilityChanges coroutine started. shouldShow={shouldShow}, isShowing={isShowing}");
-        
-        // Store visibility locally to avoid state corruption in WebGL
-        bool targetVisibility = shouldShow;
-        
-        // First wait for the end of frame
-        yield return new WaitForEndOfFrame();
-         //Debug.Log($"[TutorialStep {step}] After first WaitForEndOfFrame. Target visibility: {targetVisibility}");
-        
-        // Apply the correct state based on parameter
-        if (targetVisibility)
+        // No WaitForEndOfFrame — apply immediately
+        if (shouldShow)
         {
-            //Debug.Log($"[TutorialStep {step}] Applying visible state from coroutine");
             ApplyVisibleState();
+
+            // Safety double-checks (kept from original)
+            if (canvasGroup != null && canvasGroup.alpha < 0.9f)
+                canvasGroup.alpha = 1f;
+            if (tutorialImage != null && !tutorialImage.enabled)
+                tutorialImage.enabled = true;
+
+            Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+            foreach (Renderer r in renderers)
+                r.enabled = true;
+
+            // DELETE the parentCanvas toggle — that was causing a flash by itself
+            // DELETE the WaitForSeconds(0.2f)
         }
         else
         {
-            //Debug.Log($"[TutorialStep {step}] Applying hidden state from coroutine");
             ApplyHiddenState();
         }
-            
-        // Sometimes WebGL needs an extra frame
-        yield return new WaitForEndOfFrame();
-        // Debug.Log($"[TutorialStep {step}] After second WaitForEndOfFrame");
-        
-        // Double-check that our changes were applied
-        if (targetVisibility)
-        {
-            // Debug.Log($"[TutorialStep {step}] Double-checking visible state - Alpha: {canvasGroup?.alpha}, Image.enabled: {tutorialImage?.enabled}, GameObject.active: {gameObject.activeSelf}");
-            
-            // Extra safety in case something isn't working
-            if (canvasGroup != null && canvasGroup.alpha < 0.9f)
-            {
-                // Debug.LogWarning($"[TutorialStep {step}] WARNING: Alpha is still low ({canvasGroup.alpha}), forcing to 1");
-                canvasGroup.alpha = 1f;
-            }
-            
-            if (tutorialImage != null && !tutorialImage.enabled)
-            {
-                // Debug.LogWarning($"[TutorialStep {step}] WARNING: Image is still disabled, forcing enabled");
-                tutorialImage.enabled = true;
-            }
-            
-            // Try direct renderer approach as backup
-            Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
-            foreach (Renderer r in renderers)
-            {
-                // Debug.Log($"[TutorialStep {step}] Found renderer: {r.name}, Enabled: {r.enabled}");
-                r.enabled = true;
-            }
-            
-            // Last resort - force canvas update
-            if (parentCanvas != null)
-            {
-                // Debug.Log($"[TutorialStep {step}] Forcing Canvas update: {parentCanvas.name}");
-                parentCanvas.enabled = false;
-                yield return new WaitForEndOfFrame();
-                parentCanvas.enabled = true;
-            }
-            
-            // Validate UI state after visibility changes
-            // ValidateUIState("AfterCoroutine");
-            
-            // Add a final visibility check a few frames later to confirm WebGL rendering
-            yield return new WaitForSeconds(0.2f);
-            // ValidateUIState("DelayedCheck");
-        }
-        
-        // Debug.Log($"[TutorialStep {step}] Visibility coroutine complete");
+
+        yield break; // still a valid coroutine, nothing yields
     }
-    
+
+    //private IEnumerator ApplyVisibilityChanges(bool shouldShow)
+    //{
+    //     //Debug.Log($"[TutorialStep {step}] ApplyVisibilityChanges coroutine started. shouldShow={shouldShow}, isShowing={isShowing}");
+
+    //    // Store visibility locally to avoid state corruption in WebGL
+    //    bool targetVisibility = shouldShow;
+
+    //    // First wait for the end of frame
+    //    yield return new WaitForEndOfFrame();
+    //     //Debug.Log($"[TutorialStep {step}] After first WaitForEndOfFrame. Target visibility: {targetVisibility}");
+
+    //    // Apply the correct state based on parameter
+    //    if (targetVisibility)
+    //    {
+    //        //Debug.Log($"[TutorialStep {step}] Applying visible state from coroutine");
+    //        ApplyVisibleState();
+    //    }
+    //    else
+    //    {
+    //        //Debug.Log($"[TutorialStep {step}] Applying hidden state from coroutine");
+    //        ApplyHiddenState();
+    //    }
+
+    //    // Sometimes WebGL needs an extra frame
+    //    yield return new WaitForEndOfFrame();
+    //    // Debug.Log($"[TutorialStep {step}] After second WaitForEndOfFrame");
+
+    //    // Double-check that our changes were applied
+    //    if (targetVisibility)
+    //    {
+    //        // Debug.Log($"[TutorialStep {step}] Double-checking visible state - Alpha: {canvasGroup?.alpha}, Image.enabled: {tutorialImage?.enabled}, GameObject.active: {gameObject.activeSelf}");
+
+    //        // Extra safety in case something isn't working
+    //        if (canvasGroup != null && canvasGroup.alpha < 0.9f)
+    //        {
+    //            // Debug.LogWarning($"[TutorialStep {step}] WARNING: Alpha is still low ({canvasGroup.alpha}), forcing to 1");
+    //            canvasGroup.alpha = 1f;
+    //        }
+
+    //        if (tutorialImage != null && !tutorialImage.enabled)
+    //        {
+    //            // Debug.LogWarning($"[TutorialStep {step}] WARNING: Image is still disabled, forcing enabled");
+    //            tutorialImage.enabled = true;
+    //        }
+
+    //        // Try direct renderer approach as backup
+    //        Renderer[] renderers = GetComponentsInChildren<Renderer>(true);
+    //        foreach (Renderer r in renderers)
+    //        {
+    //            // Debug.Log($"[TutorialStep {step}] Found renderer: {r.name}, Enabled: {r.enabled}");
+    //            r.enabled = true;
+    //        }
+
+    //        // Last resort - force canvas update
+    //        if (parentCanvas != null)
+    //        {
+    //            // Debug.Log($"[TutorialStep {step}] Forcing Canvas update: {parentCanvas.name}");
+    //            parentCanvas.enabled = false;
+    //            yield return new WaitForEndOfFrame();
+    //            parentCanvas.enabled = true;
+    //        }
+
+    //        // Validate UI state after visibility changes
+    //        // ValidateUIState("AfterCoroutine");
+
+    //        // Add a final visibility check a few frames later to confirm WebGL rendering
+    //        yield return new WaitForSeconds(0.2f);
+    //        // ValidateUIState("DelayedCheck");
+    //    }
+
+    //    // Debug.Log($"[TutorialStep {step}] Visibility coroutine complete");
+    //}
+
     private void ValidateUIState(string checkpoint)
     {
         StringBuilder validationLog = new StringBuilder();

@@ -51,6 +51,11 @@ public class CustomerActions : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
         controller = GetComponent<CustomerController>();
+
+        if (gm == null)
+        {
+            gm = FindObjectOfType<GM>();
+        }
     }
 
     void Start()
@@ -60,7 +65,7 @@ public class CustomerActions : MonoBehaviour
 
     void OnDestroy()
     {
-        Debug.Log("OnDestroy");
+        //Debug.Log("OnDestroy");
         isDestroyed = true;
         CleanupCoroutines();
         UnregisterEventListeners();
@@ -150,15 +155,22 @@ public class CustomerActions : MonoBehaviour
     }
 
     private void OnCoffeeProduced(Coffee coffee) {
+
+        if (this == null || gameObject == null) return;
         coffeeApproved = false;
         StartCoroutine(TutorialHelper.ShowTutorialStepUntil(7, () => coffeeApproved));
         if (gm.GetQualityLevel() > 0) {
             if (EventManager.current.HasNextCoffee())
             {
-                Debug.Log("Coffee in queue will be used for the customer");
+                //Debug.Log("Coffee in queue will be used for the customer");
                 
                 // Check if this approval was correct (customer wanted this coffee flavor)
                 CoffeeOrder nextCoffee = EventManager.current.PeekNextCoffee();
+                if (nextCoffee == null)
+                {
+                    return; // Exit cleanly if the customer doesn't have an active order assignment anymore
+                }
+
                 if (nextCoffee.Coffee.flavor == customer.expectedFlavor)
                 {
                     // This was a correct approval
@@ -177,28 +189,28 @@ public class CustomerActions : MonoBehaviour
 
         if (customer == null)
         {
-            Debug.Log($"[CustomerActions] Ignoring - No traditional customer data found.");
+            //Debug.Log($"[CustomerActions] Ignoring - No traditional customer data found.");
             return;
         }
 
         // --- DEBUG START ---
         string customerName = this.gameObject.name; // Assuming the GO name is useful
         MovementController thisController = this.controller; // Cache for logging
-        Debug.Log($"[START-OnApproveCoffee-{customerName}] Event received by instance.");
+        //Debug.Log($"[START-OnApproveCoffee-{customerName}] Event received by instance.");
 
         MovementController frontCustomer = waitLineController.GetFrontCustomer();
         int currentPosition = waitLineController.GetPositionInLine(thisController);
 
-        Debug.Log($"[START-OnApproveCoffee-{customerName}] Current Front Customer reported by LineController: '{frontCustomer?.name}'. This customer's position: {currentPosition}");
+        //Debug.Log($"[START-OnApproveCoffee-{customerName}] Current Front Customer reported by LineController: '{frontCustomer?.name}'. This customer's position: {currentPosition}");
         // --- DEBUG END ---
 
         // Check if this customer is at the front of the wait line
         if (frontCustomer == thisController)
         {
-            Debug.Log($"[START-OnApproveCoffee-{customerName}] Matched front customer. Setting coffeeApproved=true.");
+            //Debug.Log($"[START-OnApproveCoffee-{customerName}] Matched front customer. Setting coffeeApproved=true.");
             if (EventManager.current.HasNextCoffee())
             {
-                Debug.Log($"[START-OnApproveCoffee-{customerName}] Coffee in queue will be used.");
+                //Debug.Log($"[START-OnApproveCoffee-{customerName}] Coffee in queue will be used.");
 
                 // Check if this approval was correct (customer wanted this coffee flavor)
                 CoffeeOrder nextCoffee = EventManager.current.PeekNextCoffee();
@@ -232,7 +244,7 @@ public class CustomerActions : MonoBehaviour
         {
             // Check if this denial was correct (customer didn't want this coffee flavor)
             CoffeeOrder coffeeToExplode = EventManager.current.PeekNextCoffee();
-            Debug.Log("Exploding coffee from the queue");
+            //Debug.Log("Exploding coffee from the queue");
             if (frontCustomer == controller)
             {
                 if (coffeeToExplode.Coffee.flavor != customer.expectedFlavor)
@@ -316,7 +328,7 @@ public class CustomerActions : MonoBehaviour
     {
         if (moneyAnimationPrefab == null || targetCanvas == null)
         {
-            Debug.LogWarning("Money animation prefab or target canvas is not assigned!");
+            //Debug.LogWarning("Money animation prefab or target canvas is not assigned!");
             return;
         }
         
@@ -355,7 +367,7 @@ public class CustomerActions : MonoBehaviour
 
         if (featureLineController == null)
         {
-            Debug.LogError($"FeatureLineController is missing on {gameObject.name}!");
+            //Debug.LogError($"FeatureLineController is missing on {gameObject.name}!");
             yield break;
         }
 
@@ -391,7 +403,7 @@ public class CustomerActions : MonoBehaviour
 
         if (featureLineController == null)
         {
-            Debug.LogError($"FeatureLineController is missing on {gameObject.name}! Did you assign it in GM.cs?");
+            //Debug.LogError($"FeatureLineController is missing on {gameObject.name}! Did you assign it in GM.cs?");
             yield break;
         }
 
@@ -418,9 +430,13 @@ public class CustomerActions : MonoBehaviour
     private IEnumerator HandleInitialInteraction()
     {
         if (TutorialHelper.IsInTutorial) {
-            Debug.Log("Pause timer");
+            //Debug.Log("Pause timer");
             EventManager.current.PauseTimer();
         }
+
+        if (gm == null) gm = FindObjectOfType<GM>();
+
+
         // For level 0, need to be clicked first
         bool clicked = false;
         //tutorialCoroutine = StartCoroutine(TutorialHelper.ShowTutorialStepUntil(1, () => clicked || isDestroyed));
@@ -435,7 +451,7 @@ public class CustomerActions : MonoBehaviour
         if (isDestroyed) yield break;
         if (clicked)
         {
-            Debug.Log($"Customer clicked! Feature Level: {gm.GetFeatureLevel()}"); // DEBUG
+            //Debug.Log($"Customer clicked! Feature Level: {gm.GetFeatureLevel()}"); // DEBUG
             if (gm.GetFeatureLevel() == 0) 
             {
                 controller.ShowSpeechBubble(SpeechBubbleController.BubbleIcon.Comment);
@@ -547,7 +563,7 @@ public class CustomerActions : MonoBehaviour
              // Check if already destroyed before trying to leave
             if (!isDestroyed) {
                  // Use this.gameObject.name for potentially more specific logging
-                 Debug.LogWarning($"[WaitForCoffeeApproval-{this.gameObject.name}] Condition not met after wait (Final Front: {finalFront?.name}, This: {controller?.name}, Approved: {coffeeApproved}). Leaving.");
+                 //Debug.LogWarning($"[WaitForCoffeeApproval-{this.gameObject.name}] Condition not met after wait (Final Front: {finalFront?.name}, This: {controller?.name}, Approved: {coffeeApproved}). Leaving.");
                  // Customer is timing out or leaving the line without being served
                  yield return LeaveEarly();
             } else {

@@ -224,6 +224,7 @@ public class NewBrainAnalytics : MonoBehaviour
             if (startOfDayWeights.ContainsKey(data.keyword)) startingWeight = startOfDayWeights[data.keyword];
 
             float delta = data.weight - startingWeight;
+            if (Mathf.Abs(delta) < 0.001f) continue;
             if (Mathf.Approximately(delta, 0f)) continue;
 
             GameObject logEntry = Instantiate(wordLogEntryPrefab, wordLogParent);

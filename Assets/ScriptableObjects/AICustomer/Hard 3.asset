@@ -18,7 +18,7 @@ MonoBehaviour:
   customerType: 2
   favoriteTemp: 1
   orderDialogue: Something bold and bitter, but iced.
-  orderAudio: {fileID: 8300000, guid: b5e340b5d24984b61bac027307406d12, type: 3}
+  orderAudio: {fileID: 8300000, guid: 8afb0dd0f98e54d4b9bc4e764b1fd55f, type: 3}
   aiConfidence: 0.5
   expectedFlavor: 5
   expectedTemp: 1

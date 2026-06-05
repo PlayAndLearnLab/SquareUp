@@ -1,0 +1,22 @@
+{
+    "keywords": [
+	{ "keyword": "coffee", "suggestedCaffeine": 1, "suggestedTemp": 0.0, "suggestedProfile": 0.0, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "hot", "suggestedCaffeine": 0, "suggestedTemp": 0.0, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": true },
+	{ "keyword": "sweet", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "iced", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": true },
+	{ "keyword": "latte", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "cold", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": true },
+	{ "keyword": "apple", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "earthy", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "no caffeine", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "pumpkin", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "chocolate", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "vibrant", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "fruit", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "chilled", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": true },
+	{ "keyword": "energy", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "boost", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "bold", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false },
+	{ "keyword": "bitter", "suggestedCaffeine": 0, "suggestedTemp": 0.5, "suggestedProfile": 0.5, "weight": 0.1, "onlyUpdatesTemp": false }
+  ]
+}

@@ -8,7 +8,7 @@ public class AICustomerActions : MonoBehaviour
     private CoffeeBrain brain;
     private CustomerController controller;
     private MovementController movController;
-    public AICustomer aiCustomer;
+    //public AICustomer aiCustomer;
 
     // Line references (Assign these via GM when spawning)
     public LineController featureLineController;
@@ -180,7 +180,7 @@ public class AICustomerActions : MonoBehaviour
 
 
 
-    public void InitializeCustomer(AICustomer customerData)
+    public void InitializeCustomer(AICustomer customerData, Transform entryPoint = null)
     {
         this.data = customerData;
         this.brain = FindObjectOfType<CoffeeBrain>();
@@ -198,6 +198,12 @@ public class AICustomerActions : MonoBehaviour
 
         // 1. Instantiate visuals (Same as traditional)
         GameObject customerObject = Instantiate(data.customerPrefab, transform);
+
+        if (entryPoint != null)
+        {
+            transform.position = entryPoint.position;
+        }
+
         customerObject.transform.localPosition = new Vector3(0.79f, 1.7f, 0.0001525647f);
         customerObject.transform.localRotation = Quaternion.Euler(0, 1, 0);
         customerObject.transform.localScale = new Vector3(-3, 3, 3);

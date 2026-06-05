@@ -31,18 +31,29 @@ public class IntroConrtoller : MonoBehaviour
             slideImage.sprite = slidesData.Slides[currentSlide];
         }
 
-        nextButton.onClick.AddListener(NextSlide);
-        previousButton.onClick.AddListener(PreviousSlide);
-        nextButton.interactable = false;
-        previousButton.interactable = false;
+        //nextButton.onClick.AddListener(NextSlide);
+        //previousButton.onClick.AddListener(PreviousSlide);
+
+        //nextButton.interactable = false;
+        //previousButton.interactable = false;
+
+        if (nextButton != null) nextButton.onClick.AddListener(NextSlide);
+        if (previousButton != null) previousButton.onClick.AddListener(PreviousSlide);
+
+        if (nextButton != null) nextButton.interactable = false;
+        if (previousButton != null) previousButton.interactable = false;
 
         // check if there is only one slide
-        if (slidesData.SlidesCount != 1)
+        if (slidesData.SlidesCount != 1 && nextButton != null)
         {
             nextButton.interactable = true;
         }
 
-        nextButtonText = nextButton.GetComponentInChildren<TextMeshProUGUI>();
+        //nextButtonText = nextButton.GetComponentInChildren<TextMeshProUGUI>();
+        if (nextButton != null && nextButtonText == null)
+        {
+            nextButtonText = nextButton.GetComponentInChildren<TextMeshProUGUI>();
+        }
 
         // Print the current width and height of the game window
         print("Current width: " + Screen.width);
@@ -51,27 +62,61 @@ public class IntroConrtoller : MonoBehaviour
 
     public void CheckInteractable()
     {
-        if (currentSlide == 0)
+
+        if (previousButton != null)
         {
-            previousButton.interactable = false;
-        }
-        else
-        {
-            previousButton.interactable = true;
+            if (currentSlide == 0)
+            {
+                previousButton.interactable = false;
+            }
+            else
+            {
+                previousButton.interactable = true;
+            }
         }
 
-        if (currentSlide == slidesData.SlidesCount - 1)
+
+        //if (currentSlide == 0)
+        //{
+        //    previousButton.interactable = false;
+        //}
+        //else
+        //{
+        //    previousButton.interactable = true;
+        //}
+
+        if (nextButton == null)
         {
-            nextButtonText.text = "Start!";
+            Debug.LogWarning("[IntroController] nextButton reference is missing!");
+            return;
         }
-        else
+
+        if (nextButtonText != null)
         {
-            nextButtonText.text = "Next";
+            if (currentSlide == slidesData.SlidesCount - 1)
+            {
+                nextButtonText.text = "Start!";
+            }
+            else
+            {
+                nextButtonText.text = "Next";
+            }
         }
+
+        //if (currentSlide == slidesData.SlidesCount - 1)
+        //{
+        //    nextButtonText.text = "Start!";
+        //}
+        //else
+        //{
+        //    nextButtonText.text = "Next";
+        //}
     }
 
     public void NextSlide()
     {
+        if (slidesData == null || slidesData.SlidesCount == 0) return;
+
         if (currentSlide == slidesData.SlidesCount - 1)
         {
             if (onSlideshowComplete != null)
@@ -85,14 +130,18 @@ public class IntroConrtoller : MonoBehaviour
             return;
         }
         currentSlide++;
-        slideImage.sprite = slidesData.Slides[currentSlide];
+        //slideImage.sprite = slidesData.Slides[currentSlide];
+        if (slideImage != null) slideImage.sprite = slidesData.Slides[currentSlide];
         CheckInteractable();
     }
 
     public void PreviousSlide()
     {
+        if (slidesData == null || currentSlide <= 0) return;
+
         currentSlide--;
-        slideImage.sprite = slidesData.Slides[currentSlide];
+        //slideImage.sprite = slidesData.Slides[currentSlide];
+        if (slideImage != null) slideImage.sprite = slidesData.Slides[currentSlide];
         CheckInteractable();
     }
 
@@ -103,13 +152,18 @@ public class IntroConrtoller : MonoBehaviour
         
         // Reset to first slide
         currentSlide = 0;
-        
+
         // Update the image
-        if (slidesData.SlidesCount > 0)
+        //if (slidesData.SlidesCount > 0)
+        //{
+        //    slideImage.sprite = slidesData.Slides[currentSlide];
+        //}
+
+        if (slidesData != null && slidesData.SlidesCount > 0 && slideImage != null)
         {
             slideImage.sprite = slidesData.Slides[currentSlide];
         }
-        
+
         // Update button states
         CheckInteractable();
     }

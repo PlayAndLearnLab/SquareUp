@@ -44,28 +44,71 @@ public static class TutorialHelper
         explodeCoffee = explode;
     }
 
+    //public static void OnTutorialStepCompleted(int stepIndex)
+    //{
+    //    if (stepIndex == currentTutorialStep)
+    //    {
+    //        // log the current tutorial step
+    //        Debug.Log("Tutorial step completed: " + currentTutorialStep);
+    //        Debug.Log("Tutorial step queued: " + isTutorialStepQueued);
+    //        currentTutorialStep++;
+    //        isTutorialStepComplete = true;
+    //        if (!isTutorialStepQueued) {
+    //            EventManager.current.TutorialStepReady(currentTutorialStep);
+    //        } else {
+    //            isTutorialStepQueued = false;
+    //            CoroutineHelper.Instance.RunCoroutine(WaitForTutorialStep(currentTutorialStep));
+    //        }
+    //    }
+    //}
+
     public static void OnTutorialStepCompleted(int stepIndex)
     {
         if (stepIndex == currentTutorialStep)
         {
-            // log the current tutorial step
-            Debug.Log("Tutorial step completed: " + currentTutorialStep);
-            Debug.Log("Tutorial step queued: " + isTutorialStepQueued);
             currentTutorialStep++;
             isTutorialStepComplete = true;
-            if (!isTutorialStepQueued) {
+
+            if (!isTutorialStepQueued)
+            {
                 EventManager.current.TutorialStepReady(currentTutorialStep);
-            } else {
+            }
+            else
+            {
                 isTutorialStepQueued = false;
-                CoroutineHelper.Instance.RunCoroutine(WaitForTutorialStep(currentTutorialStep));
+                // Fire TutorialStepStarted immediately (same frame) before any coroutine yield
+                isTutorialStepComplete = false;
+                EventManager.current.TutorialStepStarted(currentTutorialStep); // ← same frame as hide
+                                                                               // Then start the wait coroutine separately
+                CoroutineHelper.Instance.RunCoroutine(WaitForStepToComplete(currentTutorialStep));
             }
         }
+    }
+
+    private static IEnumerator WaitForStepToComplete(int stepIndex)
+    {
+        isTutorialStepComplete = false;
+        yield return new WaitUntil(() => isTutorialStepComplete);
+    }
+
+    public static void Reset()
+    {
+        currentTutorialStep = 0;
+        isTutorialStepComplete = false;
+        isTutorialStepQueued = false;
+        Debug.Log("[TutorialHelper] Static state reset for new scene.");
     }
 
     public static IEnumerator WaitForTutorialStep(int stepIndex)
     {
         if (!isInTutorial)
         {
+            yield break;
+        }
+
+        if (currentTutorialStep > stepIndex)
+        {
+            Debug.Log($"[TutorialHelper] Skipping step {stepIndex} because current progress is already at step {currentTutorialStep}.");
             yield break;
         }
 
@@ -83,6 +126,11 @@ public static class TutorialHelper
 
     public static IEnumerator ShowTutorialStepUntil(int stepIndex, Func<bool> condition)
     {
+        if (isInTutorial && currentTutorialStep > stepIndex)
+        {
+            yield break;
+        }
+
         if (!isInTutorial || currentTutorialStep != stepIndex) {
             Debug.Log("Tutorial step " + stepIndex + " cannot be started. IsInTutorial: " + isInTutorial + ", CurrentStep: " + currentTutorialStep);
             yield break;

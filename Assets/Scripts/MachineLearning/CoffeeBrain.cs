@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Networking;
 using System.Linq;
 using System.IO;
 using TMPro;
@@ -86,7 +87,8 @@ public class CoffeeBrain : MonoBehaviour
         // Only load if the database is empty or we're forcing a refresh
         //Debug.Log(brainDatabase.Count == 0);
 
-        LoadDatabase();
+        //LoadDatabase();
+        StartCoroutine(LoadDatabaseCoroutine());
 
         //if (brainDatabase == null || brainDatabase.Count == 0)
         //{
@@ -94,24 +96,24 @@ public class CoffeeBrain : MonoBehaviour
         //    LoadDatabase();
         //}
 
-        analytics.CaptureStartOfDay(brainDatabase);
+        //analytics.CaptureStartOfDay(brainDatabase);
 
-        dailySuccesses = 0;
-        dailyMisses = 0;
+        //dailySuccesses = 0;
+        //dailyMisses = 0;
 
-        if (currentDay == 0)
-        {
-            //Debug.Log("Day 0: Resetting AI Brain weights to 0.1");
-            foreach (var data in brainDatabase)
-            {
-                data.weight = 0.1f; // Force start at 0.1 as requested
-            }
-            SaveLearnedWeights(); // Save this clean state
-        }
-        else if (PlayerPrefs.HasKey("HasSavedBrain"))
-        {
-            LoadLearnedWeights();
-        }
+        //if (currentDay == 0)
+        //{
+        //    //Debug.Log("Day 0: Resetting AI Brain weights to 0.1");
+        //    foreach (var data in brainDatabase)
+        //    {
+        //        data.weight = 0.1f; // Force start at 0.1 as requested
+        //    }
+        //    SaveLearnedWeights(); // Save this clean state
+        //}
+        //else if (PlayerPrefs.HasKey("HasSavedBrain"))
+        //{
+        //    LoadLearnedWeights();
+        //}
 
         EventManager.current.onDayCompleted += () => {
             isProcessingAI = false;
@@ -179,6 +181,75 @@ public class CoffeeBrain : MonoBehaviour
         PlayerPrefs.DeleteKey("HasSavedBrain");
         PlayerPrefs.DeleteKey("SavedBrainData");
         Init(); // Reverts to base JSON
+    }
+
+    private IEnumerator LoadDatabaseCoroutine()
+    {
+        string filePath = Path.Combine(Application.streamingAssetsPath, "BrainData.json");
+        string jsonText = "";
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    // 1. WebGL Asynchronous Request Path
+    using (UnityWebRequest webRequest = UnityWebRequest.Get(filePath))
+    {
+        yield return webRequest.SendWebRequest();
+
+        if (webRequest.result == UnityWebRequest.Result.Success)
+        {
+            jsonText = webRequest.downloadHandler.text;
+            Debug.Log("[CoffeeBrain WebGL] BrainData JSON successfully downloaded via WebGL Request.");
+        }
+        else
+        {
+            Debug.LogError($"[CoffeeBrain WebGL Error] Failed to load BrainData.json: {webRequest.error}");
+        }
+    }
+#else
+        // 2. Editor & Local Desktop Sync Path
+        if (File.Exists(filePath))
+        {
+            jsonText = File.ReadAllText(filePath);
+            Debug.Log("[CoffeeBrain Editor] BrainData JSON successfully read from local file system.");
+        }
+        else
+        {
+            Debug.LogError($"[CoffeeBrain Editor Error] File not found at path: {filePath}");
+        }
+        yield return null;
+#endif
+
+        // 3. Parse and assign the downloaded database content
+        if (!string.IsNullOrEmpty(jsonText))
+        {
+            BrainWrapper wrapper = JsonUtility.FromJson<BrainWrapper>(jsonText);
+            brainDatabase = wrapper.keywords;
+            Debug.Log($"[CoffeeBrain] Database successfully loaded. Entries found: {brainDatabase.Count}");
+        }
+
+        GM gameManager = FindObjectOfType<GM>();
+        int currentDay = (gameManager != null) ? gameManager.day : 0;
+
+        if (currentDay == 0)
+        {
+            foreach (var data in brainDatabase)
+            {
+                data.weight = 0.1f;
+            }
+            SaveLearnedWeights();
+        }
+        else if (PlayerPrefs.HasKey("HasSavedBrain"))
+        {
+            LoadLearnedWeights();
+        }
+
+        // Capture baseline values AFTER loading/restoring has completely completed
+        if (analytics != null)
+        {
+            analytics.CaptureStartOfDay(brainDatabase);
+        }
+
+        dailySuccesses = 0;
+        dailyMisses = 0;
     }
 
     void LoadDatabase()
@@ -514,10 +585,79 @@ public class CoffeeBrain : MonoBehaviour
     }
 
     /// <summary>
+    /// Public wrapper to safely fire the asynchronous learning boost coroutine pipeline.
+    /// </summary>
+    public void ApplyLearningBoost(float boostPercentage)
+    {
+        StartCoroutine(ApplyLearningBoostCoroutine(boostPercentage));
+    }
+
+    private IEnumerator ApplyLearningBoostCoroutine(float boostPercentage)
+    {
+        string path = Path.Combine(Application.streamingAssetsPath, "Ideal_BrainData.json");
+        string jsonText = "";
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    // WebGL Network request implementation path
+    using (UnityWebRequest webRequest = UnityWebRequest.Get(path))
+    {
+        yield return webRequest.SendWebRequest();
+
+        if (webRequest.result == UnityWebRequest.Result.Success)
+        {
+            jsonText = webRequest.downloadHandler.text;
+        }
+        else
+        {
+            Debug.LogError($"[Learning Boost WebGL Error] Failed to download master baseline configuration: {webRequest.error}");
+            yield break; // Abort routine execution safely
+        }
+    }
+#else
+        // Native editor/desktop verification path
+        if (File.Exists(path))
+        {
+            jsonText = File.ReadAllText(path);
+        }
+        else
+        {
+            Debug.LogError($"[Learning Boost Editor Error] Ideal_BrainData.json master file not found at: {path}");
+            yield break;
+        }
+        yield return null;
+#endif
+
+        // Run parameters updating pass
+        if (!string.IsNullOrEmpty(jsonText))
+        {
+            BrainWrapper masterWrapper = JsonUtility.FromJson<BrainWrapper>(jsonText);
+            List<KeywordData> idealDatabase = masterWrapper.keywords;
+
+            foreach (var liveData in brainDatabase)
+            {
+                KeywordData idealData = idealDatabase.Find(x => x.keyword.Equals(liveData.keyword, StringComparison.OrdinalIgnoreCase));
+
+                if (idealData != null)
+                {
+                    // Nudge active parameter states closer to master targets
+                    liveData.suggestedCaffeine = Mathf.Lerp(liveData.suggestedCaffeine, idealData.suggestedCaffeine, boostPercentage);
+                    liveData.suggestedTemp = Mathf.Lerp(liveData.suggestedTemp, idealData.suggestedTemp, boostPercentage);
+                    liveData.suggestedProfile = Mathf.Lerp(liveData.suggestedProfile, idealData.suggestedProfile, boostPercentage);
+                    liveData.weight = Mathf.Lerp(liveData.weight, idealData.weight, boostPercentage);
+                }
+            }
+
+            // Persist newly boosted params immediately 
+            SaveLearnedWeights();
+            Debug.Log($"<color=#50C878><b>[AI LEARNING BOOST]</b> Model parameters shifted {boostPercentage * 100}% closer to target values!</color>");
+        }
+    }
+
+    /// <summary>
     /// Nudges the player's currently active brain parameters closer to the perfect JSON values.
     /// </summary>
     /// <param name="boostPercentage">The percentage closer to perfect (e.g., 0.3f for 30%)</param>
-    public void ApplyLearningBoost(float boostPercentage)
+    public void old_ApplyLearningBoost(float boostPercentage)
     {
         string path = Path.Combine(Application.streamingAssetsPath, "Ideal_BrainData.json");
 
